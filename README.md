@@ -13,7 +13,7 @@
 
 ## Live Demo
 
-> **[splitfree.vercel.app](https://splitfree.vercel.app)**
+> **[splitfree-zeta.vercel.app](https://splitfree-zeta.vercel.app)**
 
 ---
 
