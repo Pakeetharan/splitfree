@@ -6,6 +6,7 @@ import { LayoutDashboard, FolderOpen, Plus, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { UserMenu } from "./user-menu";
 import { SyncIndicator } from "@/components/ui/sync-indicator";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { cn } from "@/lib/utils";
 
@@ -88,6 +89,7 @@ export function Header() {
               <Plus className="h-3.5 w-3.5" />
               New Group
             </Link>
+            <ThemeToggle />
             <SyncIndicator />
             <UserMenu />
             {/* Mobile hamburger */}
