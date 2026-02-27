@@ -80,9 +80,11 @@ export function MemberList({
             <MemberCard
               key={member._id}
               member={member}
+              groupId={groupId}
               currentUserId={currentUserId}
               isOwner={isOwner}
               onRemove={handleRemove}
+              onEdited={refresh}
             />
           ))}
         </div>

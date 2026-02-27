@@ -180,11 +180,11 @@ export async function updateMember(
   });
   if (!member) throw notFound();
 
-  // Don't allow editing the owner member's record directly
-  if (member.role === "owner" && member.userId?.toHexString() === userId) {
+  // If the member is linked to a registered user, email is immutable
+  if (data.email !== undefined && !member.isVirtual) {
     throw new Response(
-      JSON.stringify({ error: "Cannot edit group owner membership" }),
-      { status: 403, headers: { "Content-Type": "application/json" } },
+      JSON.stringify({ error: "Cannot change email for a linked member" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -195,7 +195,33 @@ export async function updateMember(
   };
 
   if (data.name !== undefined) updateFields.name = data.name;
-  if (data.email !== undefined) updateFields.email = data.email.toLowerCase();
+
+  // Handle email update — may link a virtual member to a registered user
+  if (data.email !== undefined) {
+    const email = data.email.toLowerCase();
+    updateFields.email = email;
+
+    // Check if this email belongs to a registered user
+    const users = await getUsersCollection();
+    const existingUser = await users.findOne({ email, deletedAt: null });
+    if (existingUser) {
+      // Ensure this user is not already a member of the group
+      const duplicate = await members.findOne({
+        groupId: groupOid,
+        userId: existingUser._id,
+        _id: { $ne: memberOid },
+        deletedAt: null,
+      });
+      if (duplicate) {
+        throw new Response(
+          JSON.stringify({ error: "User is already a member of this group" }),
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      updateFields.userId = existingUser._id;
+      updateFields.isVirtual = false;
+    }
+  }
 
   await members.updateOne({ _id: memberOid }, { $set: updateFields });
   return { ...member, ...updateFields };

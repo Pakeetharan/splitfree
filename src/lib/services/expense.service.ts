@@ -190,8 +190,12 @@ export async function updateExpense(
   });
   if (!expense) throw notFound();
 
-  // Only the expense creator can edit
-  if (expense.createdBy.toHexString() !== userId) throw forbidden();
+  // Only the expense creator or the group owner can edit
+  const groups = await getGroupsCollection();
+  const group = await groups.findOne({ _id: groupOid, deletedAt: null });
+  const isCreator = expense.createdBy.toHexString() === userId;
+  const isGroupOwner = group?.createdBy.toHexString() === userId;
+  if (!isCreator && !isGroupOwner) throw forbidden();
 
   // Version check for optimistic concurrency
   if (data._version !== expense._version) {
@@ -243,7 +247,13 @@ export async function deleteExpense(
     deletedAt: null,
   });
   if (!expense) throw notFound();
-  if (expense.createdBy.toHexString() !== userId) throw forbidden();
+
+  // Only the expense creator or the group owner can delete
+  const groups = await getGroupsCollection();
+  const group = await groups.findOne({ _id: groupOid, deletedAt: null });
+  const isCreator = expense.createdBy.toHexString() === userId;
+  const isGroupOwner = group?.createdBy.toHexString() === userId;
+  if (!isCreator && !isGroupOwner) throw forbidden();
 
   const now = new Date();
   await expenses.updateOne(

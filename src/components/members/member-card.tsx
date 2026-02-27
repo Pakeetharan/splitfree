@@ -1,24 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Crown, User } from "lucide-react";
+import { Trash2, Pencil, Crown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EditMemberDialog } from "@/components/members/edit-member-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { MemberResponse } from "@/types/api";
 
 interface MemberCardProps {
   member: MemberResponse;
+  groupId: string;
   currentUserId: string;
   isOwner: boolean;
   onRemove?: (memberId: string) => void;
+  onEdited?: () => void;
 }
 
 export function MemberCard({
   member,
+  groupId,
   currentUserId,
   isOwner,
   onRemove,
+  onEdited,
 }: MemberCardProps) {
   const [removing, setRemoving] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const isSelf = member.userId === currentUserId;
 
   const handleRemove = async () => {
@@ -26,6 +34,7 @@ export function MemberCard({
     setRemoving(true);
     try {
       await onRemove(member._id);
+      setConfirmRemoveOpen(false);
     } finally {
       setRemoving(false);
     }
@@ -78,18 +87,53 @@ export function MemberCard({
         </div>
       </div>
 
-      {isOwner && !isSelf && member.role !== "owner" && onRemove && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleRemove}
-          disabled={removing}
-          className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-          aria-label="Remove member"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+      {isOwner && (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditOpen(true)}
+            className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            aria-label="Edit member"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+
+          {!isSelf && member.role !== "owner" && onRemove && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setConfirmRemoveOpen(true)}
+              disabled={removing}
+              className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+              aria-label="Remove member"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       )}
+
+      {/* Edit dialog */}
+      <EditMemberDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        groupId={groupId}
+        member={member}
+        onSaved={() => onEdited?.()}
+      />
+
+      {/* Remove confirmation dialog */}
+      <ConfirmDialog
+        open={confirmRemoveOpen}
+        onOpenChange={setConfirmRemoveOpen}
+        title="Remove Member"
+        description={`Are you sure you want to remove "${member.name}" from this group? They will no longer appear in new expenses, but existing expense data will be preserved.`}
+        confirmLabel="Remove"
+        variant="danger"
+        loading={removing}
+        onConfirm={handleRemove}
+      />
     </div>
   );
 }

@@ -44,6 +44,7 @@ export default async function ExpensesPage({ params }: PageProps) {
   }
 
   const groupId = group._id.toHexString();
+  const isOwner = group.createdBy.toHexString() === user.id;
   const expenses: ExpenseResponse[] = expenseResult.expenses.map(serializeDoc);
   const members: MemberResponse[] = memberDocs.map(serializeDoc);
   const memberMap: Record<string, string> = Object.fromEntries(
@@ -98,6 +99,8 @@ export default async function ExpensesPage({ params }: PageProps) {
           groupId={id}
           currency={group.currency}
           currentUserId={user.id}
+          isOwner={isOwner}
+          members={members}
           memberMap={memberMap}
           initialExpenses={expenses}
           initialTotal={expenseResult.total}

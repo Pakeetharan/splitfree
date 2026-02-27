@@ -3,13 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
 import { ExpenseCard } from "@/components/expenses/expense-card";
+import { EditExpenseDialog } from "@/components/expenses/edit-expense-dialog";
 import { Button } from "@/components/ui/button";
-import type { ExpenseResponse } from "@/types/api";
+import type { ExpenseResponse, MemberResponse } from "@/types/api";
 
 interface ExpenseListProps {
   groupId: string;
   currency: string;
   currentUserId: string;
+  isOwner: boolean;
+  members: MemberResponse[];
   memberMap: Record<string, string>; // memberId -> name
   initialExpenses: ExpenseResponse[];
   initialTotal: number;
@@ -21,6 +24,8 @@ export function ExpenseList({
   groupId,
   currency,
   currentUserId,
+  isOwner,
+  members,
   memberMap,
   initialExpenses,
   initialTotal,
@@ -29,6 +34,9 @@ export function ExpenseList({
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<ExpenseResponse | null>(
+    null,
+  );
 
   const loadPage = useCallback(
     async (p: number) => {
@@ -83,16 +91,21 @@ export function ExpenseList({
       ) : (
         <>
           <div className="space-y-2">
-            {expenses.map((exp) => (
-              <ExpenseCard
-                key={exp._id}
-                expense={exp}
-                currency={currency}
-                paidByName={memberMap[exp.paidBy]}
-                canDelete={exp.createdBy === currentUserId}
-                onDelete={handleDelete}
-              />
-            ))}
+            {expenses.map((exp) => {
+              const canModify = exp.createdBy === currentUserId || isOwner;
+              return (
+                <ExpenseCard
+                  key={exp._id}
+                  expense={exp}
+                  currency={currency}
+                  paidByName={memberMap[exp.paidBy]}
+                  canEdit={canModify}
+                  canDelete={canModify}
+                  onEdit={setEditingExpense}
+                  onDelete={handleDelete}
+                />
+              );
+            })}
           </div>
 
           {totalPages > 1 && (
@@ -124,6 +137,24 @@ export function ExpenseList({
             </div>
           )}
         </>
+      )}
+
+      {/* Edit expense dialog */}
+      {editingExpense && (
+        <EditExpenseDialog
+          open={!!editingExpense}
+          onOpenChange={(open) => {
+            if (!open) setEditingExpense(null);
+          }}
+          groupId={groupId}
+          expense={editingExpense}
+          members={members}
+          currency={currency}
+          onSaved={() => {
+            setEditingExpense(null);
+            loadPage(page);
+          }}
+        />
       )}
     </div>
   );

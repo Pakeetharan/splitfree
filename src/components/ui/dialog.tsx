@@ -45,33 +45,39 @@ export function Dialog({
         aria-hidden="true"
       />
 
-      {/* Panel */}
-      <div className="relative z-10 mx-4 w-full max-w-lg rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-950">
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={handleClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-        >
-          <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
-        </button>
+      {/* Panel — flex column so header stays fixed and body scrolls */}
+      <div className="relative z-10 mx-4 flex w-full max-w-lg flex-col rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950" style={{ maxHeight: "90dvh" }}>
+        {/* Fixed header */}
+        <div className="shrink-0 px-6 pt-6 pb-0">
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={handleClose}
+            className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
 
-        {/* Title rendered via prop (legacy API) */}
-        {title && (
-          <div className="mb-4 pr-8">
-            <h2 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100">
-              {title}
-            </h2>
-            {description && (
-              <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-                {description}
-              </p>
-            )}
-          </div>
-        )}
+          {/* Title rendered via prop (legacy API) */}
+          {title && (
+            <div className="mb-4 pr-8">
+              <h2 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100">
+                {title}
+              </h2>
+              {description && (
+                <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                  {description}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
-        {children}
+        {/* Scrollable body — min-h-0 is required so flex-1 can shrink and scroll */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatAmount, formatDate } from "@/lib/utils";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 import type { ExpenseResponse } from "@/types/api";
@@ -11,7 +12,9 @@ interface ExpenseCardProps {
   expense: ExpenseResponse;
   currency: string;
   paidByName?: string;
+  canEdit?: boolean;
   canDelete?: boolean;
+  onEdit?: (expense: ExpenseResponse) => void;
   onDelete?: (expenseId: string) => void;
 }
 
@@ -37,17 +40,20 @@ export function ExpenseCard({
   expense,
   currency,
   paidByName,
+  canEdit,
   canDelete,
+  onEdit,
   onDelete,
 }: ExpenseCardProps) {
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const handleDelete = async () => {
     if (!onDelete || deleting) return;
-    if (!confirm("Delete this expense?")) return;
     setDeleting(true);
     try {
       await onDelete(expense._id);
+      setConfirmDeleteOpen(false);
     } finally {
       setDeleting(false);
     }
@@ -93,19 +99,47 @@ export function ExpenseCard({
           </p>
         </div>
 
-        {canDelete && onDelete && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-            aria-label="Delete expense"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        {(canEdit || canDelete) && (
+          <div className="flex items-center gap-1">
+            {canEdit && onEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(expense)}
+                className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                aria-label="Edit expense"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+
+            {canDelete && onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmDeleteOpen(true)}
+                disabled={deleting}
+                className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                aria-label="Delete expense"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title="Delete Expense"
+        description={`Are you sure you want to delete "${expense.description}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

@@ -7,26 +7,43 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
-import type { MemberResponse } from "@/types/api";
+import type { MemberResponse, ExpenseResponse } from "@/types/api";
 
 interface ExpenseFormProps {
   groupId: string;
   members: MemberResponse[];
   currency: string;
+  /** When provided, the form operates in edit mode */
+  expense?: ExpenseResponse;
+  /** Called after a successful save in edit mode */
+  onSaved?: () => void;
 }
 
-export function ExpenseForm({ groupId, members, currency }: ExpenseFormProps) {
+export function ExpenseForm({
+  groupId,
+  members,
+  currency,
+  expense,
+  onSaved,
+}: ExpenseFormProps) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
+  const isEditMode = !!expense;
 
-  const [description, setDescription] = useState("");
-  const [amountStr, setAmountStr] = useState("");
-  const [paidBy, setPaidBy] = useState(members[0]?._id ?? "");
-  const [splitAmong, setSplitAmong] = useState<string[]>(
-    members.map((m) => m._id),
+  const [description, setDescription] = useState(expense?.description ?? "");
+  const [amountStr, setAmountStr] = useState(
+    expense ? (expense.amount / 100).toFixed(2) : "",
   );
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState(today);
+  const [paidBy, setPaidBy] = useState(
+    expense?.paidBy ?? members[0]?._id ?? "",
+  );
+  const [splitAmong, setSplitAmong] = useState<string[]>(
+    expense?.splitAmong ?? members.map((m) => m._id),
+  );
+  const [category, setCategory] = useState(expense?.category ?? "");
+  const [date, setDate] = useState(
+    expense ? expense.date.split("T")[0] : today,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,27 +70,53 @@ export function ExpenseForm({ groupId, members, currency }: ExpenseFormProps) {
     setError(null);
 
     try {
-      const res = await fetch(`/api/groups/${groupId}/expenses`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          description: description.trim(),
-          amount: amountCents,
-          paidBy,
-          splitAmong,
-          category: category || undefined,
-          date,
-        }),
-      });
+      let res: Response;
+
+      if (isEditMode && expense) {
+        // Edit mode — PATCH
+        res = await fetch(`/api/groups/${groupId}/expenses/${expense._id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description: description.trim(),
+            amount: amountCents,
+            paidBy,
+            splitAmong,
+            category: category || undefined,
+            date,
+            _version: expense._version,
+          }),
+        });
+      } else {
+        // Create mode — POST
+        res = await fetch(`/api/groups/${groupId}/expenses`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description: description.trim(),
+            amount: amountCents,
+            paidBy,
+            splitAmong,
+            category: category || undefined,
+            date,
+          }),
+        });
+      }
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to create expense");
+        setError(
+          data.error ?? `Failed to ${isEditMode ? "update" : "create"} expense`,
+        );
         return;
       }
 
-      router.push(`/dashboard/groups/${groupId}/expenses`);
-      router.refresh();
+      if (isEditMode && onSaved) {
+        onSaved();
+      } else {
+        router.push(`/dashboard/groups/${groupId}/expenses`);
+        router.refresh();
+      }
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -195,7 +238,14 @@ export function ExpenseForm({ groupId, members, currency }: ExpenseFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (isEditMode && onSaved) {
+              // In dialog mode, just close without saving
+              onSaved();
+            } else {
+              router.back();
+            }
+          }}
           disabled={loading}
           className="flex-1"
         >
@@ -211,7 +261,9 @@ export function ExpenseForm({ groupId, members, currency }: ExpenseFormProps) {
           }
           className="flex-1"
         >
-          {loading ? "Saving…" : "Add Expense"}
+          {loading ? "Saving…" : ""}
+          {!loading && isEditMode ? "Save Changes" : ""}
+          {!loading && !isEditMode ? "Add Expense" : ""}
         </Button>
       </div>
     </form>
