@@ -140,6 +140,7 @@ export interface BalanceEntry {
   memberId: string;
   name: string;
   netBalance: number; // positive = owed money, negative = owes money
+  totalSpent: number; // this member's own share of all expenses (their total spend for the trip)
 }
 
 export interface TransferSuggestion {

@@ -72,6 +72,37 @@ export function BalancesClient({
         )}
       </div>
 
+      {/* Total spent per person */}
+      <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+          Total Spent
+        </h2>
+        <div className="space-y-3">
+          {[...balances]
+            .sort((a, b) => b.totalSpent - a.totalSpent)
+            .map((b) => {
+              const groupTotal = balances.reduce((s, x) => s + x.totalSpent, 0) || 1;
+              const pct = Math.round((b.totalSpent / groupTotal) * 100);
+              return (
+                <div key={b.memberId} className="flex items-center gap-3">
+                  <div className="w-24 shrink-0 truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {b.name}
+                  </div>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div
+                      className="h-full rounded-full bg-blue-500 dark:bg-blue-400"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <div className="w-24 shrink-0 text-right text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {formatAmount(b.totalSpent, currency)}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+
       {/* Suggested settlements */}
       {suggestions.length > 0 && (
         <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">

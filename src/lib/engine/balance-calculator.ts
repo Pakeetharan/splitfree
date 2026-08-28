@@ -67,6 +67,11 @@ export async function computeBalances(
   const balanceMap = new Map<string, number>(
     memberDocs.map((m) => [m._id.toHexString(), 0]),
   );
+  // Tracks each member's own share of expenses (what they actually spent),
+  // regardless of who fronted the money.
+  const totalSpentMap = new Map<string, number>(
+    memberDocs.map((m) => [m._id.toHexString(), 0]),
+  );
 
   // Process expenses
   for (const expense of expenseDocs) {
@@ -81,12 +86,14 @@ export async function computeBalances(
     const payerBal = balanceMap.get(payerId) ?? 0;
     balanceMap.set(payerId, payerBal + expense.amount);
 
-    // Each split member gets debited their share
+    // Each split member gets debited their share, and it counts toward
+    // their total spend for the trip
     expense.splitAmong.forEach((memberId, idx) => {
       const mid = memberId.toHexString();
       const share = idx < remainder ? base + 1 : base;
       const curBal = balanceMap.get(mid) ?? 0;
       balanceMap.set(mid, curBal - share);
+      totalSpentMap.set(mid, (totalSpentMap.get(mid) ?? 0) + share);
     });
   }
 
@@ -107,5 +114,6 @@ export async function computeBalances(
     memberId: m._id.toHexString(),
     name: m.name || `Member`,
     netBalance: balanceMap.get(m._id.toHexString()) ?? 0,
+    totalSpent: totalSpentMap.get(m._id.toHexString()) ?? 0,
   }));
 }
