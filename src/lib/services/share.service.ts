@@ -133,7 +133,10 @@ export async function getPublicShareData(token: string): Promise<PublicShareData
       .toArray(),
   ]);
 
-  // Enrich members with user profile names and avatars (same logic as listMembers)
+  // Enrich members with an avatar from their linked account, but keep the
+  // group-maintained name/email as-is — the share link is a public,
+  // group-scoped view, so it should show the name the group set for this
+  // member, not their account's profile name.
   const linkedUserIds = memberDocs
     .filter((m) => m.userId !== null)
     .map((m) => m.userId!);
@@ -151,7 +154,7 @@ export async function getPublicShareData(token: string): Promise<PublicShareData
     if (m.userId) {
       const user = userMap.get(m.userId.toHexString());
       if (user) {
-        return { ...m, name: user.name, email: user.email, avatarUrl: user.avatarUrl ?? null };
+        return { ...m, avatarUrl: user.avatarUrl ?? null };
       }
     }
     return m;

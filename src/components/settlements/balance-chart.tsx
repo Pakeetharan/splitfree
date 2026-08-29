@@ -18,12 +18,12 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
         const pct = Math.round((Math.abs(b.netBalance) / maxAbs) * 100);
 
         return (
-          <div key={b.memberId} className="flex items-center gap-3">
-            <div className="w-16 shrink-0 truncate text-right text-sm font-medium text-text-secondary sm:w-24">
+          <div key={b.memberId} className="flex items-center gap-2 sm:gap-3">
+            <div className="w-12 shrink-0 truncate text-right text-xs font-medium text-text-secondary sm:w-24 sm:text-sm">
               {b.name}
             </div>
 
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               {/* negative side */}
               <div className="flex flex-1 justify-end">
                 {!isPositive && (
@@ -35,7 +35,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               </div>
 
               {/* center line */}
-              <div className="h-5 w-px bg-border-primary" />
+              <div className="h-5 w-px shrink-0 bg-border-primary" />
 
               {/* positive side */}
               <div className="flex flex-1 justify-start">
@@ -49,7 +49,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
             </div>
 
             <div
-              className={`w-16 shrink-0 text-sm font-semibold sm:w-24 ${
+              className={`min-w-12 shrink-0 whitespace-nowrap text-right text-xs font-semibold sm:min-w-24 sm:text-sm ${
                 isPositive && b.netBalance > 0
                   ? "text-positive"
                   : b.netBalance < 0
