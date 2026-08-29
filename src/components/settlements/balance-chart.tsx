@@ -19,7 +19,7 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
 
         return (
           <div key={b.memberId} className="flex items-center gap-3">
-            <div className="w-24 shrink-0 truncate text-right text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="w-16 shrink-0 truncate text-right text-sm font-medium text-text-secondary sm:w-24">
               {b.name}
             </div>
 
@@ -28,20 +28,20 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
               <div className="flex flex-1 justify-end">
                 {!isPositive && (
                   <div
-                    className="h-5 rounded-l-full bg-red-400 dark:bg-red-500"
+                    className="h-5 rounded-l-full bg-negative"
                     style={{ width: `${pct}%` }}
                   />
                 )}
               </div>
 
               {/* center line */}
-              <div className="h-5 w-px bg-gray-300 dark:bg-gray-600" />
+              <div className="h-5 w-px bg-border-primary" />
 
               {/* positive side */}
               <div className="flex flex-1 justify-start">
                 {isPositive && b.netBalance > 0 && (
                   <div
-                    className="h-5 rounded-r-full bg-emerald-400 dark:bg-emerald-500"
+                    className="h-5 rounded-r-full bg-positive"
                     style={{ width: `${pct}%` }}
                   />
                 )}
@@ -49,12 +49,12 @@ export function BalanceChart({ balances, currency }: BalanceChartProps) {
             </div>
 
             <div
-              className={`w-24 shrink-0 text-sm font-semibold ${
+              className={`w-16 shrink-0 text-sm font-semibold sm:w-24 ${
                 isPositive && b.netBalance > 0
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-positive"
                   : b.netBalance < 0
-                    ? "text-red-600 dark:text-red-400"
-                    : "text-gray-400"
+                    ? "text-negative"
+                    : "text-text-muted"
               }`}
             >
               {b.netBalance === 0

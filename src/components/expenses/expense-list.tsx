@@ -5,6 +5,7 @@ import { Receipt } from "lucide-react";
 import { ExpenseCard } from "@/components/expenses/expense-card";
 import { EditExpenseDialog } from "@/components/expenses/edit-expense-dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import type { ExpenseResponse, MemberResponse } from "@/types/api";
 
 interface ExpenseListProps {
@@ -37,6 +38,7 @@ export function ExpenseList({
   const [editingExpense, setEditingExpense] = useState<ExpenseResponse | null>(
     null,
   );
+  const { toast } = useToast();
 
   const loadPage = useCallback(
     async (p: number) => {
@@ -71,6 +73,9 @@ export function ExpenseList({
     if (res.ok) {
       setExpenses((prev) => prev.filter((e) => e._id !== expenseId));
       setTotal((prev) => prev - 1);
+      toast("Expense deleted", "success");
+    } else {
+      toast("Failed to delete expense", "error");
     }
   };
 
@@ -79,12 +84,12 @@ export function ExpenseList({
   return (
     <div className="space-y-4">
       {expenses.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 px-6 py-12 text-center dark:border-gray-700">
-          <Receipt className="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <div className="rounded-xl border border-dashed border-border-primary px-6 py-12 text-center">
+          <Receipt className="mx-auto mb-2 h-8 w-8 text-text-muted" />
+          <p className="text-sm font-medium text-text-muted">
             No expenses yet
           </p>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-text-muted">
             Add the first expense to get started.
           </p>
         </div>
@@ -109,8 +114,8 @@ export function ExpenseList({
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-between rounded-xl border border-border-primary bg-surface-elevated px-4 py-3">
+              <span className="text-sm text-text-muted">
                 {total} expense{total !== 1 ? "s" : ""} total
               </span>
               <div className="flex items-center gap-2">
@@ -122,7 +127,7 @@ export function ExpenseList({
                 >
                   Previous
                 </Button>
-                <span className="min-w-12 text-center text-sm text-gray-600 dark:text-gray-400">
+                <span className="min-w-12 text-center text-sm text-text-secondary">
                   {page} / {totalPages}
                 </span>
                 <Button

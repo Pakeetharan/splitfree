@@ -18,7 +18,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="flex flex-col items-center gap-3">
           <img
@@ -31,14 +31,14 @@ export default async function LoginPage() {
             alt="SplitFree"
             className="hidden h-10 w-auto dark:block"
           />
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-text-muted">
             Sign in to manage your shared expenses
           </p>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl border border-border-primary bg-surface-elevated p-6 shadow-sm">
           <LoginButton />
-          <p className="mt-4 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-4 text-xs text-text-muted">
             By signing in you agree to our terms of service.
           </p>
         </div>

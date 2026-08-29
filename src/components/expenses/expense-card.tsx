@@ -65,10 +65,10 @@ export function ExpenseCard({
       : categoryColors.other;
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="flex items-center justify-between rounded-xl border border-border-primary bg-surface-elevated p-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+          <span className="font-medium text-text-primary truncate">
             {expense.description}
           </span>
           {expense.category && (
@@ -79,7 +79,7 @@ export function ExpenseCard({
             </span>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-1 flex items-center gap-3 text-xs text-text-muted">
           <span>{formatDate(expense.date)}</span>
           {paidByName && <span>Paid by {paidByName}</span>}
           <span>
@@ -91,10 +91,10 @@ export function ExpenseCard({
 
       <div className="flex items-center gap-3 ml-4">
         <div className="text-right">
-          <p className="font-semibold text-gray-900 dark:text-gray-100">
+          <p className="font-semibold text-text-primary">
             {formatAmount(expense.amount, currency)}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-text-muted">
             {formatAmount(expense.splitAmount, currency)}/person
           </p>
         </div>
@@ -106,7 +106,7 @@ export function ExpenseCard({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(expense)}
-                className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                className="text-text-muted hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
                 aria-label="Edit expense"
               >
                 <Pencil className="h-4 w-4" />

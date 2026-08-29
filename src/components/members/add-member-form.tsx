@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 
 interface AddMemberFormProps {
   groupId: string;
@@ -23,6 +24,7 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +45,9 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to add member");
+        const message = data.error ?? "Failed to add member";
+        setError(message);
+        toast(message, "error");
         return;
       }
 
@@ -51,8 +55,10 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
       setEmail("");
       setOpen(false);
       onAdded();
+      toast("Member added", "success");
     } catch {
       setError("Network error. Please try again.");
+      toast("Network error. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -73,7 +79,7 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -86,9 +92,9 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Email{" "}
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-text-muted">
                   (optional — links to registered user)
                 </span>
               </label>

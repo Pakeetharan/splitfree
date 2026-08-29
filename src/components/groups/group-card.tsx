@@ -44,7 +44,7 @@ export function GroupCard({ group }: GroupCardProps) {
 
         <CardContent>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-4 text-sm text-text-muted">
               {group.memberCount !== undefined && (
                 <span className="inline-flex items-center gap-1">
                   <Users className="h-3.5 w-3.5" />
@@ -57,8 +57,8 @@ export function GroupCard({ group }: GroupCardProps) {
               <span
                 className={`text-sm font-semibold ${
                   balance > 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-red-600 dark:text-red-400"
+                    ? "text-positive"
+                    : "text-negative"
                 }`}
               >
                 {balance > 0 ? "+" : "−"}{" "}
@@ -68,7 +68,7 @@ export function GroupCard({ group }: GroupCardProps) {
             {balance === 0 &&
               group.memberCount !== undefined &&
               group.memberCount > 1 && (
-                <span className="text-xs text-gray-400 dark:text-gray-500">
+                <span className="text-xs text-text-muted">
                   Settled
                 </span>
               )}

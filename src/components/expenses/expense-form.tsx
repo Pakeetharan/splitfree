@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { useToast } from "@/components/ui/toast";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 import type { MemberResponse, ExpenseResponse } from "@/types/api";
 
@@ -30,6 +31,7 @@ export function ExpenseForm({
   onLoadingChange,
 }: ExpenseFormProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const today = new Date().toISOString().split("T")[0];
   const isEditMode = !!expense;
 
@@ -113,11 +115,14 @@ export function ExpenseForm({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(
-          data.error ?? `Failed to ${isEditMode ? "update" : "create"} expense`,
-        );
+        const message =
+          data.error ?? `Failed to ${isEditMode ? "update" : "create"} expense`;
+        setError(message);
+        toast(message, "error");
         return;
       }
+
+      toast(isEditMode ? "Expense updated" : "Expense added", "success");
 
       if (isEditMode && onSaved) {
         onSaved();
@@ -127,6 +132,7 @@ export function ExpenseForm({
       }
     } catch {
       setError("Network error. Please try again.");
+      toast("Network error. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -136,7 +142,7 @@ export function ExpenseForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Description */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Description <span className="text-red-500">*</span>
         </label>
         <Input
@@ -150,7 +156,7 @@ export function ExpenseForm({
 
       {/* Amount */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Amount ({currency}) <span className="text-red-500">*</span>
         </label>
         <Input
@@ -166,7 +172,7 @@ export function ExpenseForm({
 
       {/* Paid By */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Paid by <span className="text-red-500">*</span>
         </label>
         <Select
@@ -184,22 +190,22 @@ export function ExpenseForm({
 
       {/* Split Among */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Split among <span className="text-red-500">*</span>
         </label>
-        <div className="space-y-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+        <div className="space-y-2 rounded-lg border border-border-primary p-3">
           {members.map((m) => (
             <label
               key={m._id}
-              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/60"
+              className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800/60"
             >
               <input
                 type="checkbox"
                 checked={splitAmong.includes(m._id)}
                 onChange={() => toggleMember(m._id)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                className="h-4 w-4 rounded border-border-primary accent-accent"
               />
-              <span className="text-sm text-gray-800 dark:text-gray-200">
+              <span className="text-sm text-text-primary">
                 {m.name}
               </span>
             </label>
@@ -211,7 +217,7 @@ export function ExpenseForm({
           </p>
         )}
         {amountStr && splitAmong.length > 0 && (
-          <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-1.5 text-xs text-text-muted">
             ≈ {currency}{" "}
             {(parseFloat(amountStr) / splitAmong.length).toFixed(2)} per person
           </p>
@@ -220,7 +226,7 @@ export function ExpenseForm({
 
       {/* Category */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Category
         </label>
         <Select value={category} onChange={(e) => setCategory(e.target.value)}>

@@ -20,7 +20,7 @@ export function DatePicker({
   return (
     <div>
       {label && (
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}

@@ -103,7 +103,7 @@ export function RouteProgress() {
       aria-hidden="true"
     >
       <div
-        className="h-full bg-blue-600 transition-[width,opacity] duration-200 ease-out dark:bg-blue-400"
+        className="h-full bg-accent transition-[width,opacity] duration-200 ease-out"
         style={{ width: `${progress}%`, opacity: visible ? 1 : 0 }}
       />
     </div>

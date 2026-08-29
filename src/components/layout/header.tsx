@@ -35,7 +35,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-lg dark:border-gray-800 dark:bg-gray-950/80">
+    <header className="sticky top-0 z-50 w-full border-b border-border-primary bg-surface-primary/80 backdrop-blur-lg">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Brand + nav */}
         <div className="flex items-center gap-6">
@@ -62,15 +62,15 @@ export function Header() {
                   className={cn(
                     "relative flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors",
                     item.active
-                      ? "text-blue-700 dark:text-blue-300"
-                      : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100",
+                      ? "text-accent"
+                      : "text-text-muted hover:text-gray-900 dark:hover:text-gray-100",
                   )}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}
                   {/* Active indicator — bottom bar */}
                   {item.active && (
-                    <span className="absolute -bottom-4.25 left-0 right-0 h-0.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                    <span className="absolute -bottom-4.25 left-0 right-0 h-0.5 rounded-full bg-accent" />
                   )}
                 </Link>
               ))}
@@ -84,7 +84,7 @@ export function Header() {
             {/* Desktop CTA */}
             <Link
               href="/dashboard/groups/new"
-              className="hidden items-center gap-1.5 rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:inline-flex"
             >
               <Plus className="h-3.5 w-3.5" />
               New Group
@@ -95,7 +95,7 @@ export function Header() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 sm:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-text-muted hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:hidden dark:hover:bg-gray-800"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
@@ -110,7 +110,7 @@ export function Header() {
 
       {/* Mobile navigation sheet */}
       {!isAuthPage && mobileOpen && (
-        <div className="border-t border-gray-100 bg-white px-4 pb-4 pt-2 sm:hidden dark:border-gray-800 dark:bg-gray-950">
+        <div className="border-t border-border-subtle bg-surface-primary px-4 pb-4 pt-2 sm:hidden">
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               <Link
@@ -118,10 +118,10 @@ export function Header() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm font-medium transition-colors",
                   item.active
                     ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                    : "text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-900",
+                    : "text-text-secondary hover:bg-gray-50 dark:hover:bg-gray-900",
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -131,7 +131,7 @@ export function Header() {
             <Link
               href="/dashboard/groups/new"
               onClick={() => setMobileOpen(false)}
-              className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+              className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white hover:bg-accent-hover"
             >
               <Plus className="h-4 w-4" />
               New Group

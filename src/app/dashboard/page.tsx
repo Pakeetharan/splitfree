@@ -16,27 +16,7 @@ export default async function DashboardPage() {
   const user = await getPageAuthUser();
   const groups = await listGroups(user.id);
 
-  // Compute per-group balances for the current user in parallel
-  const balanceResults = await Promise.allSettled(
-    groups.map(async (group) => {
-      const groupId = group._id.toHexString();
-      try {
-        const balances = await computeBalances(user.id, groupId);
-        // Find the member record linked to the current user
-        const myBalance = balances.find((b) => {
-          // We need to match by userId — but BalanceEntry only has memberId.
-          // computeBalances returns all members; we'll match vs members list.
-          return true; // placeholder — we'll refine below
-        });
-        return { groupId, balances };
-      } catch {
-        return { groupId, balances: [] };
-      }
-    }),
-  );
-
   // Build a map of user's memberships to find their member IDs per group
-  // We need the member service for this
   const { listMembers } = await import("@/lib/services/member.service");
 
   type BalanceInfo = {
@@ -116,18 +96,18 @@ export default async function DashboardPage() {
         <section>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-text-primary">
                 Your Groups
               </h2>
               {groups.length > 0 && (
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                <span className="inline-flex items-center rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-medium text-text-secondary">
                   {groups.length}
                 </span>
               )}
             </div>
             <Link
               href="/dashboard/groups/new"
-              className="hidden items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 sm:inline-flex dark:text-blue-400 dark:hover:text-blue-300"
+              className="hidden items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover sm:inline-flex"
             >
               <Plus className="h-3.5 w-3.5" />
               New Group
@@ -157,17 +137,17 @@ export default async function DashboardPage() {
             </div>
           ) : (
             /* Empty state */
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-16 text-center dark:border-gray-700">
+            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-primary px-6 py-16 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
-                <Plus className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                <Plus className="h-7 w-7 text-accent" />
               </div>
               <h2 className="mt-4 text-lg font-semibold">No groups yet</h2>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-text-muted">
                 Create your first group to start splitting expenses.
               </p>
               <Link
                 href="/dashboard/groups/new"
-                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
               >
                 <Plus className="h-4 w-4" />
                 Create Group

@@ -94,7 +94,7 @@ export default function GroupSettingsPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+      <div className="mx-auto max-w-2xl py-16 text-center text-sm text-text-muted">
         Loading group settings…
       </div>
     );
@@ -108,7 +108,7 @@ export default function GroupSettingsPage() {
         </p>
         <Link
           href="/dashboard"
-          className="mt-4 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
+          className="mt-4 inline-block text-sm text-accent hover:underline"
         >
           Back to Dashboard
         </Link>
@@ -121,7 +121,7 @@ export default function GroupSettingsPage() {
       {/* Back link */}
       <Link
         href={`/dashboard/groups/${id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-gray-700 dark:hover:text-gray-200"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Group
@@ -130,7 +130,7 @@ export default function GroupSettingsPage() {
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold">Group Settings</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-text-muted">
           Update your group details or delete the group.
         </p>
       </div>
@@ -155,25 +155,25 @@ export default function GroupSettingsPage() {
       />
 
       {/* Share & Export */}
-      <div className="rounded-xl border border-gray-200 dark:border-gray-800">
-        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-800">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="rounded-xl border border-border-primary">
+        <div className="border-b border-border-primary px-4 py-3">
+          <h2 className="text-sm font-semibold text-text-secondary">
             Share &amp; Export
           </h2>
         </div>
         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium">Share group view</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted">
               Create a read-only link for people without accounts.
             </p>
           </div>
           <ShareDialog groupId={id} />
         </div>
-        <div className="flex flex-col gap-4 border-t border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
+        <div className="flex flex-col gap-4 border-t border-border-subtle p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium">Export to Excel</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted">
               Download all expenses and settlements as an XLSX file.
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function GroupSettingsPage() {
         <div className="flex items-center justify-between px-4 py-4">
           <div>
             <p className="text-sm font-medium">Delete this group</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted">
               Permanently remove this group and all its data.
             </p>
           </div>

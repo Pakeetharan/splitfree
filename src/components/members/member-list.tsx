@@ -51,11 +51,11 @@ export function MemberList({
       {/* Section header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-            <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-secondary">
+            <Users className="h-4 w-4 text-text-muted" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-sm font-medium text-text-primary">
               {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -65,12 +65,12 @@ export function MemberList({
 
       {/* Member cards */}
       {members.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 px-6 py-12 text-center dark:border-gray-700">
-          <Users className="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <div className="rounded-xl border border-dashed border-border-primary px-6 py-12 text-center">
+          <Users className="mx-auto mb-2 h-8 w-8 text-text-muted" />
+          <p className="text-sm font-medium text-text-muted">
             No members yet
           </p>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-text-muted">
             Add your first member to get started.
           </p>
         </div>

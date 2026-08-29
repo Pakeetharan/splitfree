@@ -14,7 +14,7 @@ export default async function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-lg dark:border-gray-800 dark:bg-gray-950/80">
+      <header className="border-b border-border-primary bg-surface-primary/80 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center">
             <img
@@ -32,7 +32,7 @@ export default async function LandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="inline-flex items-center gap-1 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
               >
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
@@ -42,7 +42,7 @@ export default async function LandingPage() {
           ) : (
             <Link
               href="/login"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
             >
               Get Started
             </Link>
@@ -56,9 +56,9 @@ export default async function LandingPage() {
           <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
             Split expenses,
             <br />
-            <span className="text-blue-600">not friendships</span>
+            <span className="text-accent">not friendships</span>
           </h1>
-          <p className="mb-8 text-lg text-gray-600 dark:text-gray-400">
+          <p className="mb-8 text-lg text-text-secondary">
             {APP_DESCRIPTION}. Works offline, syncs when you&apos;re back
             online. No sign-up required for group members.
           </p>
@@ -66,7 +66,7 @@ export default async function LandingPage() {
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white hover:bg-accent-hover"
               >
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
@@ -76,7 +76,7 @@ export default async function LandingPage() {
                 <LoginButton />
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-text-secondary hover:text-gray-900 dark:hover:text-gray-100"
                 >
                   Learn more
                   <ArrowRight className="h-4 w-4" />
@@ -116,8 +116,8 @@ export default async function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-6 dark:border-gray-800 dark:bg-gray-950">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      <footer className="border-t border-border-primary bg-surface-primary py-6">
+        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-text-muted">
           {APP_NAME} is open source.
         </div>
       </footer>
@@ -153,7 +153,7 @@ function Feature({
         {icon}
       </div>
       <h3 className="font-semibold">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
+      <p className="text-sm text-text-muted">{desc}</p>
     </div>
   );
 }

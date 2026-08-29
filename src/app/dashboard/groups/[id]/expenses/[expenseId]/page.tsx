@@ -46,23 +46,23 @@ export default async function ExpenseDetailPage({ params }: PageProps) {
       <div className="flex items-center gap-3">
         <Link
           href={`/dashboard/groups/${id}/expenses`}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="rounded-lg p-1.5 text-text-muted hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-xl font-bold">Expense Detail</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-text-muted">
             {group.name}
           </p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800/60 space-y-4">
+      <div className="rounded-xl border border-border-primary bg-surface-elevated p-6 space-y-4">
         <div>
           <h2 className="text-lg font-semibold">{expense.description}</h2>
           {expense.category && (
-            <span className="mt-1 inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-xs capitalize text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+            <span className="mt-1 inline-block rounded-full bg-surface-secondary px-2.5 py-0.5 text-xs capitalize text-text-secondary">
               {expense.category}
             </span>
           )}
@@ -70,33 +70,33 @@ export default async function ExpenseDetailPage({ params }: PageProps) {
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Total Amount</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-text-muted">Total Amount</p>
+            <p className="text-lg font-bold text-text-primary">
               {formatAmount(expense.amount, group.currency)}
             </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Per Person</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-text-muted">Per Person</p>
+            <p className="text-lg font-bold text-text-primary">
               ≈ {formatAmount(expense.splitAmount, group.currency)}
             </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Paid By</p>
-            <p className="font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-text-muted">Paid By</p>
+            <p className="font-medium text-text-primary">
               {memberMap[expense.paidBy] ?? "Unknown"}
             </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Date</p>
-            <p className="font-medium text-gray-900 dark:text-gray-100">
+            <p className="text-text-muted">Date</p>
+            <p className="font-medium text-text-primary">
               {formatDate(expense.date)}
             </p>
           </div>
         </div>
 
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          <p className="text-sm text-text-muted mb-2">
             Split among ({splitMembers.length})
           </p>
           <div className="flex flex-wrap gap-2">

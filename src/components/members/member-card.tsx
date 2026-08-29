@@ -5,6 +5,7 @@ import { Trash2, Pencil, Crown, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditMemberDialog } from "@/components/members/edit-member-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import type { MemberResponse } from "@/types/api";
 
 interface MemberCardProps {
@@ -28,6 +29,7 @@ export function MemberCard({
   const [editOpen, setEditOpen] = useState(false);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const isSelf = member.userId === currentUserId;
+  const { toast } = useToast();
 
   const handleRemove = async () => {
     if (!onRemove || removing) return;
@@ -35,13 +37,16 @@ export function MemberCard({
     try {
       await onRemove(member._id);
       setConfirmRemoveOpen(false);
+      toast("Member removed", "success");
+    } catch {
+      toast("Failed to remove member", "error");
     } finally {
       setRemoving(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="flex items-center justify-between rounded-xl border border-border-primary bg-surface-elevated p-4">
       <div className="flex items-center gap-3">
         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-400 to-purple-500 text-white overflow-hidden">
           {member.avatarUrl ? (
@@ -60,7 +65,7 @@ export function MemberCard({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-900 dark:text-gray-100">
+            <span className="font-medium text-text-primary">
               {member.name}
             </span>
             {member.role === "owner" && (
@@ -80,7 +85,7 @@ export function MemberCard({
             )}
           </div>
           {member.email && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted">
               {member.email}
             </p>
           )}
@@ -93,7 +98,7 @@ export function MemberCard({
             variant="ghost"
             size="sm"
             onClick={() => setEditOpen(true)}
-            className="text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="text-text-muted hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label="Edit member"
           >
             <Pencil className="h-4 w-4" />

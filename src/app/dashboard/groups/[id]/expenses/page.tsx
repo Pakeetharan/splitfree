@@ -68,14 +68,14 @@ export default async function ExpensesPage({ params }: PageProps) {
         {expenseResult.total > 0 ? (
           <div className="flex items-center gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
-              <Receipt className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Receipt className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-text-muted">
                 {expenseResult.total} expense
                 {expenseResult.total !== 1 ? "s" : ""} total
               </p>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-lg font-bold text-text-primary">
                 {formatAmount(totalSpend, group.currency)}
               </p>
             </div>
@@ -86,7 +86,7 @@ export default async function ExpensesPage({ params }: PageProps) {
 
         <Link
           href={`/dashboard/groups/${id}/expenses/new`}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
         >
           <Plus className="h-4 w-4" />
           Add Expense

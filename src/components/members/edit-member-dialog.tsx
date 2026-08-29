@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 import type { MemberResponse } from "@/types/api";
 
 interface EditMemberDialogProps {
@@ -25,6 +26,7 @@ export function EditMemberDialog({
   const [email, setEmail] = useState(member.email ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Email is locked once member is linked to a registered user
   const emailLocked = !member.isVirtual;
@@ -57,14 +59,18 @@ export function EditMemberDialog({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to update member");
+        const message = data.error ?? "Failed to update member";
+        setError(message);
+        toast(message, "error");
         return;
       }
 
       onSaved();
       onOpenChange(false);
+      toast("Member updated", "success");
     } catch {
       setError("Network error. Please try again.");
+      toast("Network error. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -79,7 +85,7 @@ export function EditMemberDialog({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">
             Name <span className="text-red-500">*</span>
           </label>
           <Input
@@ -92,10 +98,10 @@ export function EditMemberDialog({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">
             Email
             {emailLocked && (
-              <span className="ml-2 text-xs font-normal text-gray-400">
+              <span className="ml-2 text-xs font-normal text-text-muted">
                 (locked — linked to a registered user)
               </span>
             )}

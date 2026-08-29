@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 import type { MemberResponse, TransferSuggestion } from "@/types/api";
 
 interface SettleFormProps {
@@ -51,6 +52,7 @@ export function SettleForm({
   const [date, setDate] = useState(today);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleOpen = () => {
     if (suggestion) {
@@ -95,14 +97,18 @@ export function SettleForm({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "Failed to record settlement");
+        const message = data.error ?? "Failed to record settlement";
+        setError(message);
+        toast(message, "error");
         return;
       }
 
       setOpen(false);
       onSettled();
+      toast("Settlement recorded", "success");
     } catch {
       setError("Network error. Please try again.");
+      toast("Network error. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -126,7 +132,7 @@ export function SettleForm({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 From (Payer) <span className="text-red-500">*</span>
               </label>
               {isOwner ? (
@@ -142,7 +148,7 @@ export function SettleForm({
                   ))}
                 </Select>
               ) : (
-                <div className="flex h-10 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                <div className="flex h-10 items-center rounded-lg border border-border-primary bg-surface-secondary px-3 text-sm text-text-secondary">
                   {members.find((m) => m._id === currentUserMemberId)?.name ??
                     "You"}
                 </div>
@@ -150,7 +156,7 @@ export function SettleForm({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 To (Payee) <span className="text-red-500">*</span>
               </label>
               <Select
@@ -167,7 +173,7 @@ export function SettleForm({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Amount ({currency}) <span className="text-red-500">*</span>
               </label>
               <Input
@@ -182,8 +188,8 @@ export function SettleForm({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Note <span className="text-xs text-gray-400">(optional)</span>
+              <label className="mb-1.5 block text-sm font-medium text-text-secondary">
+                Note <span className="text-xs text-text-muted">(optional)</span>
               </label>
               <Input
                 placeholder="e.g. Cash payment"

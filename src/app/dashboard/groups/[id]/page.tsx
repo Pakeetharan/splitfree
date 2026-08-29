@@ -172,24 +172,24 @@ export default async function GroupDetailPage({ params }: PageProps) {
                 }`}
               >
                 {myNet > 0 ? (
-                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <TrendingUp className="h-5 w-5 text-positive" />
                 ) : myNet < 0 ? (
-                  <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  <TrendingDown className="h-5 w-5 text-negative" />
                 ) : (
-                  <CheckCircle2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  <CheckCircle2 className="h-5 w-5 text-text-muted" />
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <p className="text-sm font-medium text-text-muted">
                   Your balance
                 </p>
                 <p
                   className={`mt-0.5 text-2xl font-bold ${
                     myNet > 0
-                      ? "text-emerald-700 dark:text-emerald-400"
+                      ? "text-positive"
                       : myNet < 0
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "text-negative"
+                        : "text-text-secondary"
                   }`}
                 >
                   {myNet === 0
@@ -215,27 +215,27 @@ export default async function GroupDetailPage({ params }: PageProps) {
 
       {/* ── Stats row ────────────────────────────────────── */}
       <div className="mt-6 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+        <div className="rounded-xl border border-border-primary bg-surface-elevated p-3 sm:p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
             Total Spent
           </p>
-          <p className="mt-1 text-lg font-bold text-gray-900 sm:text-xl dark:text-gray-100">
+          <p className="mt-1 text-lg font-bold text-text-primary sm:text-xl">
             {formatAmount(totalSpent, group.currency)}
           </p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+        <div className="rounded-xl border border-border-primary bg-surface-elevated p-3 sm:p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
             Expenses
           </p>
-          <p className="mt-1 text-lg font-bold text-gray-900 sm:text-xl dark:text-gray-100">
+          <p className="mt-1 text-lg font-bold text-text-primary sm:text-xl">
             {totalExpenseCount}
           </p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4 dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+        <div className="rounded-xl border border-border-primary bg-surface-elevated p-3 sm:p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
             Members
           </p>
-          <p className="mt-1 text-lg font-bold text-gray-900 sm:text-xl dark:text-gray-100">
+          <p className="mt-1 text-lg font-bold text-text-primary sm:text-xl">
             {memberCount}
           </p>
         </div>
@@ -248,7 +248,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
           {/* Payments you need to make */}
           {myPayments.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
                 Payments you need to make
               </h2>
               <div className="space-y-2">
@@ -261,7 +261,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
                       <ArrowRight className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <p className="truncate text-sm font-medium text-text-primary">
                         Pay{" "}
                         <span className="font-semibold text-orange-700 dark:text-orange-400">
                           {s.toName}
@@ -288,20 +288,20 @@ export default async function GroupDetailPage({ params }: PageProps) {
           {/* Recent Expenses */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
                 Recent expenses
               </h2>
               <div className="flex items-center gap-3">
                 <Link
                   href={`/dashboard/groups/${groupId}/expenses/new`}
-                  className="hidden items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 sm:inline-flex dark:text-blue-400"
+                  className="hidden items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover sm:inline-flex"
                 >
                   <Plus className="h-3 w-3" />
                   Add
                 </Link>
                 <Link
                   href={`/dashboard/groups/${groupId}/expenses`}
-                  className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                  className="text-xs text-accent hover:underline"
                 >
                   View all →
                 </Link>
@@ -309,20 +309,20 @@ export default async function GroupDetailPage({ params }: PageProps) {
             </div>
 
             {recentExpenses.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-300 px-6 py-10 text-center dark:border-gray-700">
-                <Receipt className="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <div className="rounded-xl border border-dashed border-border-primary px-6 py-10 text-center">
+                <Receipt className="mx-auto mb-2 h-8 w-8 text-text-muted" />
+                <p className="text-sm font-medium text-text-muted">
                   No expenses yet
                 </p>
                 <Link
                   href={`/dashboard/groups/${groupId}/expenses/new`}
-                  className="mt-3 inline-block rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700"
+                  className="mt-3 inline-block rounded-lg bg-accent px-4 py-2 text-xs font-medium text-white hover:bg-accent-hover"
                 >
                   Add Expense
                 </Link>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900">
+              <div className="divide-y divide-border-subtle rounded-xl border border-border-primary bg-surface-elevated">
                 {recentExpenses.map((expense) => {
                   const payerName =
                     memberNameMap.get(expense.paidBy.toHexString()) ??
@@ -332,18 +332,18 @@ export default async function GroupDetailPage({ params }: PageProps) {
                       key={expense._id.toHexString()}
                       className="flex items-center gap-3 px-4 py-3"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-text-muted">
                         {getCategoryIcon(expense.category)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
+                        <p className="truncate text-sm font-medium text-text-primary">
                           {expense.description}
                         </p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                        <p className="text-xs text-text-muted">
                           Paid by {payerName} · {formatDate(expense.date)}
                         </p>
                       </div>
-                      <p className="shrink-0 text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      <p className="shrink-0 text-sm font-semibold text-text-primary">
                         {formatAmount(expense.amount, group.currency)}
                       </p>
                     </div>
@@ -360,17 +360,17 @@ export default async function GroupDetailPage({ params }: PageProps) {
           {sortedBalances.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
                   Balances
                 </h2>
                 <Link
                   href={`/dashboard/groups/${groupId}/balances`}
-                  className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                  className="text-xs text-accent hover:underline"
                 >
                   Details →
                 </Link>
               </div>
-              <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900">
+              <div className="divide-y divide-border-subtle rounded-xl border border-border-primary bg-surface-elevated">
                 {sortedBalances.map((b) => {
                   const isMe = b.memberId === myMemberId;
                   return (
@@ -379,10 +379,10 @@ export default async function GroupDetailPage({ params }: PageProps) {
                       className="flex items-center justify-between gap-2 px-4 py-2.5"
                     >
                       <div className="flex min-w-0 flex-1 items-center gap-2">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-xs font-semibold text-text-secondary">
                           {(b.name || "?")[0].toUpperCase()}
                         </div>
-                        <span className="min-w-0 truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="min-w-0 truncate text-sm font-medium text-text-secondary">
                           {b.name || "Member"}
                           {isMe && (
                             <span className="ml-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
@@ -394,10 +394,10 @@ export default async function GroupDetailPage({ params }: PageProps) {
                       <span
                         className={`shrink-0 whitespace-nowrap text-sm font-semibold ${
                           b.netBalance > 0
-                            ? "text-emerald-600 dark:text-emerald-400"
+                            ? "text-positive"
                             : b.netBalance < 0
-                              ? "text-red-600 dark:text-red-400"
-                              : "text-gray-400 dark:text-gray-500"
+                              ? "text-negative"
+                              : "text-text-muted"
                         }`}
                       >
                         {b.netBalance === 0
@@ -419,7 +419,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
           {/* Settlements CTA */}
           <Link
             href={`/dashboard/groups/${groupId}/settlements`}
-            className="flex items-center justify-center gap-2 rounded-xl border border-gray-200  bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center justify-center gap-2 rounded-xl border border-border-primary bg-surface-elevated px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             View settlements →
           </Link>

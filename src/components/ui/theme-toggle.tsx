@@ -24,7 +24,7 @@ export function ThemeToggle() {
   const mounted = useIsMounted();
 
   if (!mounted) {
-    return <div className="h-8 w-8" aria-hidden />;
+    return <div className="h-11 w-11" aria-hidden />;
   }
 
   const currentIdx = options.findIndex((o) => o.value === theme);
@@ -41,7 +41,7 @@ export function ThemeToggle() {
       onClick={cycle}
       title={`Theme: ${current.label} — click to cycle`}
       aria-label={`Current theme: ${current.label}. Click to switch theme.`}
-      className="flex items-center justify-center rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+      className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-text-muted transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:hover:bg-gray-800 dark:hover:text-gray-100"
     >
       <Icon className="h-4 w-4" />
     </button>

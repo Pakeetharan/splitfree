@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatAmount, formatDate } from "@/lib/utils";
 import type { SettlementResponse } from "@/types/api";
 
@@ -22,13 +23,14 @@ export function SettlementCard({
   onDelete,
 }: SettlementCardProps) {
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const handleDelete = async () => {
     if (!onDelete || deleting) return;
-    if (!confirm("Delete this settlement?")) return;
     setDeleting(true);
     try {
       await onDelete(settlement._id);
+      setConfirmDeleteOpen(false);
     } finally {
       setDeleting(false);
     }
@@ -40,14 +42,14 @@ export function SettlementCard({
     memberMap[settlement.payee] ?? settlement.payeeName ?? "Unknown";
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="flex items-center justify-between rounded-xl border border-border-primary bg-surface-elevated p-4">
       <div className="flex-1">
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
           <span>{payerName}</span>
-          <ArrowRight className="h-4 w-4 text-gray-400" />
+          <ArrowRight className="h-4 w-4 text-text-muted" />
           <span>{payeeName}</span>
         </div>
-        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-1 flex items-center gap-3 text-xs text-text-muted">
           <span>{formatDate(settlement.date)}</span>
           {settlement.note && (
             <span className="truncate">{settlement.note}</span>
@@ -56,7 +58,7 @@ export function SettlementCard({
       </div>
 
       <div className="flex items-center gap-3 ml-4">
-        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+        <span className="font-semibold text-positive">
           {formatAmount(settlement.amount, currency)}
         </span>
 
@@ -64,7 +66,7 @@ export function SettlementCard({
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleDelete}
+            onClick={() => setConfirmDeleteOpen(true)}
             disabled={deleting}
             className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
             aria-label="Delete settlement"
@@ -73,6 +75,18 @@ export function SettlementCard({
           </Button>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title="Delete Settlement"
+        description="Are you sure you want to delete this settlement? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

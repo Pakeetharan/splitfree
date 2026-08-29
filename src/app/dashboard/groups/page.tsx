@@ -40,16 +40,16 @@ export default async function GroupsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
             Groups
           </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-text-muted">
             {groups.length} group{groups.length !== 1 ? "s" : ""}
           </p>
         </div>
         <Link
           href="/dashboard/groups/new"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
         >
           <Plus className="h-4 w-4" />
           New Group
@@ -78,17 +78,17 @@ export default async function GroupsPage() {
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-16 text-center dark:border-gray-700">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-primary px-6 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
-            <Plus className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            <Plus className="h-7 w-7 text-accent" />
           </div>
           <h2 className="mt-4 text-lg font-semibold">No groups yet</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-text-muted">
             Create your first group to start splitting expenses.
           </p>
           <Link
             href="/dashboard/groups/new"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
           >
             <Plus className="h-4 w-4" />
             Create Group

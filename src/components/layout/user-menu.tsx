@@ -49,7 +49,7 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700" />
+      <div className="h-11 w-11 animate-pulse rounded-full bg-surface-secondary" />
     );
   }
 
@@ -57,7 +57,7 @@ export function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full p-1.5 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:hover:bg-gray-800"
         aria-label="User menu"
       >
         {user.avatarUrl ? (
@@ -75,19 +75,19 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900">
-          <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border-primary bg-surface-primary py-1 shadow-lg">
+          <div className="border-b border-border-subtle px-4 py-3">
+            <p className="text-sm font-medium text-text-primary">
               {user.name}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted">
               {user.email}
             </p>
           </div>
 
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <LogOut className="h-4 w-4" />
             Sign out

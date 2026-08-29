@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Share2, Copy, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import { APP_URL } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 
@@ -32,6 +35,9 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
   const [expiresInHours, setExpiresInHours] = useState(72);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [revokeId, setRevokeId] = useState<string | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const { toast } = useToast();
 
   const loadTokens = async () => {
     setLoading(true);
@@ -59,27 +65,42 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
       });
       if (res.ok) {
         await loadTokens();
+        toast("Link created", "success");
       } else {
         const data = await res.json();
-        setError(data.error ?? "Failed to create link");
+        const message = data.error ?? "Failed to create link";
+        setError(message);
+        toast(message, "error");
       }
     } finally {
       setCreating(false);
     }
   };
 
-  const handleRevoke = async (tokenId: string) => {
-    if (!confirm("Revoke this share link?")) return;
-    await fetch(`/api/groups/${groupId}/share/${tokenId}`, {
-      method: "DELETE",
-    });
-    setTokens((prev) => prev.filter((t) => t._id !== tokenId));
+  const handleRevoke = async () => {
+    if (!revokeId) return;
+    setRevoking(true);
+    try {
+      const res = await fetch(`/api/groups/${groupId}/share/${revokeId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setTokens((prev) => prev.filter((t) => t._id !== revokeId));
+        toast("Link revoked", "success");
+      } else {
+        toast("Failed to revoke link", "error");
+      }
+    } finally {
+      setRevoking(false);
+      setRevokeId(null);
+    }
   };
 
   const handleCopy = async (token: string, id: string) => {
     const url = `${APP_URL}/share/${token}`;
     await navigator.clipboard.writeText(url);
     setCopiedId(id);
+    toast("Link copied", "success");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -97,21 +118,21 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
           </DialogHeader>
 
           <div className="space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-text-muted">
               Create a read-only public link to share this group&apos;s
               expenses.
             </p>
 
             <div className="flex items-center gap-3">
-              <select
+              <Select
                 value={expiresInHours}
                 onChange={(e) => setExpiresInHours(Number(e.target.value))}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                className="flex-1"
               >
                 <option value={24}>Expires in 24 hours</option>
                 <option value={72}>Expires in 72 hours</option>
                 <option value={168}>Expires in 7 days</option>
-              </select>
+              </Select>
               <Button onClick={handleCreate} isLoading={creating} size="sm">
                 Create Link
               </Button>
@@ -122,41 +143,44 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
             )}
 
             {loading ? (
-              <p className="text-sm text-gray-400">Loading…</p>
+              <p className="text-sm text-text-muted">Loading…</p>
             ) : tokens.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
                   Active Links
                 </p>
                 {tokens.map((t) => (
                   <div
                     key={t._id}
-                    className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-700"
+                    className="flex items-center justify-between rounded-lg border border-border-primary px-3 py-2"
                   >
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-text-muted">
                       {t.expiresAt
                         ? `Expires ${formatDate(t.expiresAt)}`
                         : "No expiry"}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleCopy(t.token, t._id)}
-                        className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        title="Copy link"
+                        aria-label="Copy link"
                       >
                         {copiedId === t._id ? (
                           <Check className="h-4 w-4 text-green-500" />
                         ) : (
-                          <Copy className="h-4 w-4 text-gray-500" />
+                          <Copy className="h-4 w-4 text-text-muted" />
                         )}
-                      </button>
-                      <button
-                        onClick={() => handleRevoke(t._id)}
-                        className="rounded p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        title="Revoke link"
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setRevokeId(t._id)}
+                        className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                        aria-label="Revoke link"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -171,6 +195,20 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Revoke confirmation dialog */}
+      <ConfirmDialog
+        open={!!revokeId}
+        onOpenChange={(open) => {
+          if (!open) setRevokeId(null);
+        }}
+        title="Revoke Link"
+        description="Are you sure you want to revoke this share link? Anyone using it will lose access immediately."
+        confirmLabel="Revoke"
+        variant="danger"
+        loading={revoking}
+        onConfirm={handleRevoke}
+      />
     </>
   );
 }
