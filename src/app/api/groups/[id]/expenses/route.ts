@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAuthUser } from "@/lib/auth";
-import { listExpenses, createExpense } from "@/lib/services/expense.service";
+import {
+  listExpenses,
+  createExpense,
+  type ExpenseSortOrder,
+} from "@/lib/services/expense.service";
 import { createExpenseSchema } from "@/lib/validators/expense";
 import { serializeDoc } from "@/lib/utils";
+
+const VALID_SORTS: ExpenseSortOrder[] = [
+  "date_desc",
+  "date_asc",
+  "amount_desc",
+  "amount_asc",
+];
 
 export async function GET(
   request: NextRequest,
@@ -15,8 +26,26 @@ export async function GET(
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page") ?? "1", 10);
     const limit = parseInt(url.searchParams.get("limit") ?? "20", 10);
+    const search = url.searchParams.get("search") ?? undefined;
+    const category = url.searchParams.get("category") ?? undefined;
+    const memberId = url.searchParams.get("memberId") ?? undefined;
+    const dateFrom = url.searchParams.get("dateFrom") ?? undefined;
+    const dateTo = url.searchParams.get("dateTo") ?? undefined;
+    const sortParam = url.searchParams.get("sort");
+    const sort = VALID_SORTS.includes(sortParam as ExpenseSortOrder)
+      ? (sortParam as ExpenseSortOrder)
+      : undefined;
 
-    const result = await listExpenses(user.id, id, { page, limit });
+    const result = await listExpenses(user.id, id, {
+      page,
+      limit,
+      search,
+      category,
+      memberId,
+      dateFrom,
+      dateTo,
+      sort,
+    });
     return NextResponse.json({
       data: result.expenses.map(serializeDoc),
       total: result.total,

@@ -37,26 +37,47 @@ export function formatDate(date: string | Date): string {
 }
 
 /**
- * Recursively serialize a MongoDB document for JSON responses.
- * Converts ObjectId → string hex and Date → ISO string.
+ * Format a date as a short relative time string, e.g. "2 days ago", "just now".
+ */
+export function formatRelativeTime(date: string | Date): string {
+  const then = new Date(date).getTime();
+  const diffMs = Date.now() - then;
+  const diffSec = Math.floor(diffMs / 1000);
+
+  if (diffSec < 60) return "just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} min${diffMin !== 1 ? "s" : ""} ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} hour${diffHour !== 1 ? "s" : ""} ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 30) return `${diffDay} day${diffDay !== 1 ? "s" : ""} ago`;
+  const diffMonth = Math.floor(diffDay / 30);
+  if (diffMonth < 12) return `${diffMonth} month${diffMonth !== 1 ? "s" : ""} ago`;
+  const diffYear = Math.floor(diffMonth / 12);
+  return `${diffYear} year${diffYear !== 1 ? "s" : ""} ago`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function serializeValue(value: any): any {
+  if (value === null || value === undefined) return value;
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "object" && typeof value.toHexString === "function") {
+    return value.toHexString();
+  }
+  if (Array.isArray(value)) return value.map(serializeValue);
+  if (typeof value === "object") return serializeDoc(value);
+  return value;
+}
+
+/**
+ * Recursively serialize a MongoDB document (including nested objects/arrays)
+ * for JSON responses. Converts ObjectId → string hex and Date → ISO string.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function serializeDoc<T extends Record<string, any>>(doc: T): any {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(doc)) {
-    if (value === null || value === undefined) {
-      result[key] = value;
-    } else if (typeof value === "object" && "toHexString" in value && typeof value.toHexString === "function") {
-      result[key] = value.toHexString();
-    } else if (value instanceof Date) {
-      result[key] = value.toISOString();
-    } else if (Array.isArray(value)) {
-      result[key] = value.map((v) =>
-        v && typeof v === "object" && "toHexString" in v ? v.toHexString() : v,
-      );
-    } else {
-      result[key] = value;
-    }
+    result[key] = serializeValue(value);
   }
   return result;
 }

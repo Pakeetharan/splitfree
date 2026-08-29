@@ -19,14 +19,22 @@ import {
   Plus,
 } from "lucide-react";
 import { GroupPageShell } from "@/components/groups/group-page-shell";
+import {
+  CategoryBreakdown,
+  type CategoryTotal,
+} from "@/components/dashboard/category-breakdown";
 import { getPageAuthUser } from "@/lib/auth";
 import { getGroup } from "@/lib/services/group.service";
 import { listMembers } from "@/lib/services/member.service";
-import { getExpensesCollection } from "@/lib/mongodb/collections";
+import {
+  getExpensesCollection,
+  getSettlementsCollection,
+} from "@/lib/mongodb/collections";
 import { computeBalances } from "@/lib/engine/balance-calculator";
 import { computeOptimalSettlements } from "@/lib/engine/settlement-optimizer";
 import { formatAmount, formatDate } from "@/lib/utils";
 import { ObjectId } from "mongodb";
+import { HandCoins } from "lucide-react";
 
 function getCategoryIcon(category: string | null) {
   switch (category) {
@@ -85,16 +93,24 @@ export default async function GroupDetailPage({ params }: PageProps) {
 
   // Fetch all overview data in parallel
   const expensesCol = await getExpensesCollection();
+  const settlementsCol = await getSettlementsCollection();
   const [
     memberDocs,
     balances,
     recentExpenses,
+    recentSettlements,
     totalExpenseCount,
     totalAmountResult,
+    categoryResult,
   ] = await Promise.all([
     listMembers(user.id, id),
     computeBalances(user.id, id),
     expensesCol
+      .find({ groupId: groupOid, deletedAt: null })
+      .sort({ date: -1, createdAt: -1 })
+      .limit(5)
+      .toArray(),
+    settlementsCol
       .find({ groupId: groupOid, deletedAt: null })
       .sort({ date: -1, createdAt: -1 })
       .limit(5)
@@ -108,10 +124,20 @@ export default async function GroupDetailPage({ params }: PageProps) {
         { $group: { _id: null, total: { $sum: "$amount" } } },
       ])
       .toArray(),
+    expensesCol
+      .aggregate<{ _id: string | null; total: number }>([
+        { $match: { groupId: groupOid, deletedAt: null } },
+        { $group: { _id: "$category", total: { $sum: "$amount" } } },
+        { $sort: { total: -1 } },
+      ])
+      .toArray(),
   ]);
 
   const totalSpent = totalAmountResult[0]?.total ?? 0;
   const memberCount = memberDocs.length;
+  const categoryTotals: CategoryTotal[] = categoryResult
+    .filter((c) => c._id)
+    .map((c) => ({ category: c._id as string, total: c.total }));
 
   // Member name map keyed by hex string — uses listMembers enriched names (user profile join)
   // computeBalances() reads raw DB docs where linked users have name="" so we patch here.
@@ -141,6 +167,30 @@ export default async function GroupDetailPage({ params }: PageProps) {
   const sortedBalances = [...enrichedBalances].sort(
     (a, b) => a.netBalance - b.netBalance,
   );
+
+  // Merge recent expenses + settlements into one activity feed, most recent first
+  type ActivityItem =
+    | { kind: "expense"; date: Date; expense: (typeof recentExpenses)[number] }
+    | {
+        kind: "settlement";
+        date: Date;
+        settlement: (typeof recentSettlements)[number];
+      };
+
+  const recentActivity: ActivityItem[] = [
+    ...recentExpenses.map(
+      (expense): ActivityItem => ({ kind: "expense", date: expense.date, expense }),
+    ),
+    ...recentSettlements.map(
+      (settlement): ActivityItem => ({
+        kind: "settlement",
+        date: settlement.date,
+        settlement,
+      }),
+    ),
+  ]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 5);
 
   return (
     <GroupPageShell
@@ -285,11 +335,11 @@ export default async function GroupDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Recent Expenses */}
+          {/* Recent Activity */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
-                Recent expenses
+                Recent activity
               </h2>
               <div className="flex items-center gap-3">
                 <Link
@@ -308,7 +358,7 @@ export default async function GroupDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {recentExpenses.length === 0 ? (
+            {recentActivity.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border-primary px-6 py-10 text-center">
                 <Receipt className="mx-auto mb-2 h-8 w-8 text-text-muted" />
                 <p className="text-sm font-medium text-text-muted">
@@ -323,28 +373,60 @@ export default async function GroupDetailPage({ params }: PageProps) {
               </div>
             ) : (
               <div className="divide-y divide-border-subtle rounded-xl border border-border-primary bg-surface-elevated">
-                {recentExpenses.map((expense) => {
+                {recentActivity.map((item) => {
+                  if (item.kind === "expense") {
+                    const { expense } = item;
+                    const payerName =
+                      memberNameMap.get(expense.paidBy.toHexString()) ??
+                      "Unknown";
+                    return (
+                      <div
+                        key={`e-${expense._id.toHexString()}`}
+                        className="flex items-center gap-3 px-4 py-3"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-text-muted">
+                          {getCategoryIcon(expense.category)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-text-primary">
+                            {expense.description}
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            Paid by {payerName} · {formatDate(expense.date)}
+                          </p>
+                        </div>
+                        <p className="shrink-0 text-sm font-semibold text-text-primary">
+                          {formatAmount(expense.amount, group.currency)}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  const { settlement } = item;
                   const payerName =
-                    memberNameMap.get(expense.paidBy.toHexString()) ??
+                    memberNameMap.get(settlement.payer.toHexString()) ??
+                    "Unknown";
+                  const payeeName =
+                    memberNameMap.get(settlement.payee.toHexString()) ??
                     "Unknown";
                   return (
                     <div
-                      key={expense._id.toHexString()}
+                      key={`s-${settlement._id.toHexString()}`}
                       className="flex items-center gap-3 px-4 py-3"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-secondary text-text-muted">
-                        {getCategoryIcon(expense.category)}
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+                        <HandCoins className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-text-primary">
-                          {expense.description}
+                          {payerName} paid {payeeName}
                         </p>
                         <p className="text-xs text-text-muted">
-                          Paid by {payerName} · {formatDate(expense.date)}
+                          Settlement · {formatDate(settlement.date)}
                         </p>
                       </div>
-                      <p className="shrink-0 text-sm font-semibold text-text-primary">
-                        {formatAmount(expense.amount, group.currency)}
+                      <p className="shrink-0 text-sm font-semibold text-positive">
+                        {formatAmount(settlement.amount, group.currency)}
                       </p>
                     </div>
                   );
@@ -412,6 +494,21 @@ export default async function GroupDetailPage({ params }: PageProps) {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Spending by category */}
+          {categoryTotals.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
+                Spending by category
+              </h2>
+              <div className="rounded-xl border border-border-primary bg-surface-elevated p-4">
+                <CategoryBreakdown
+                  categories={categoryTotals}
+                  currency={group.currency}
+                />
               </div>
             </div>
           )}

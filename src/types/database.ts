@@ -44,6 +44,21 @@ export interface DbMember {
 }
 
 // ─── Expenses ────────────────────────────────────────────
+export type SplitType = "equal" | "exact" | "percentage" | "shares";
+
+/** Raw per-member input for non-equal splits (before resolution to cents). */
+export interface SplitValue {
+  memberId: ObjectId;
+  /** cents for "exact", percentage points (sums to 100) for "percentage", integer share count for "shares" */
+  value: number;
+}
+
+/** Resolved per-member split amount in cents. Always sums to expense.amount. */
+export interface SplitDetail {
+  memberId: ObjectId;
+  amount: number;
+}
+
 export interface DbExpense {
   _id: ObjectId;
   groupId: ObjectId;
@@ -52,8 +67,12 @@ export interface DbExpense {
   currency: string;
   paidBy: ObjectId; // members._id
   splitAmong: ObjectId[]; // members._id[]
-  splitAmount: number; // computed: floor(amount / splitAmong.length)
+  splitAmount: number; // computed: floor(amount / splitAmong.length) — average, for display
+  splitType: SplitType;
+  splitValues: SplitValue[] | null; // raw input for non-equal splits, null for "equal"
+  splitDetails: SplitDetail[]; // resolved per-member amounts, authoritative for balance math
   category: string | null;
+  notes: string | null;
   date: Date;
   createdBy: ObjectId; // users._id
   createdAt: Date;

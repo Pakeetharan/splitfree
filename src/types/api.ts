@@ -1,3 +1,6 @@
+import type { SplitType } from "@/types/database";
+export type { SplitType };
+
 // ─── Auth Types ──────────────────────────────────────────
 export interface AuthUser {
   id: string; // MongoDB _id as string
@@ -45,6 +48,7 @@ export interface GroupResponse {
   memberCount?: number;
   expenseCount?: number;
   totalExpenses?: number;
+  hasExpenses?: boolean;
 }
 
 // ─── Member API ──────────────────────────────────────────
@@ -73,12 +77,25 @@ export interface MemberResponse {
 }
 
 // ─── Expense API ─────────────────────────────────────────
+export interface SplitValueInput {
+  memberId: string;
+  value: number;
+}
+
+export interface SplitDetailResponse {
+  memberId: string;
+  amount: number;
+}
+
 export interface CreateExpenseRequest {
   description: string;
   amount: number; // in cents
   paidBy: string; // member _id
   splitAmong: string[]; // member _id[]
+  splitType?: SplitType;
+  splitValues?: SplitValueInput[];
   category?: string;
+  notes?: string;
   date: string; // ISO 8601
 }
 
@@ -87,7 +104,10 @@ export interface UpdateExpenseRequest {
   amount?: number;
   paidBy?: string;
   splitAmong?: string[];
+  splitType?: SplitType;
+  splitValues?: SplitValueInput[];
   category?: string;
+  notes?: string;
   date?: string;
   updatedAt: string;
   _version: number;
@@ -103,7 +123,11 @@ export interface ExpenseResponse {
   paidByName?: string;
   splitAmong: string[];
   splitAmount: number;
+  splitType: SplitType;
+  splitValues: SplitValueInput[] | null;
+  splitDetails: SplitDetailResponse[];
   category: string | null;
+  notes: string | null;
   date: string;
   createdBy: string;
   createdAt: string;

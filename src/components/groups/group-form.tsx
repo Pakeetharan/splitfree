@@ -21,6 +21,8 @@ interface GroupFormProps {
   }) => Promise<void>;
   isLoading?: boolean;
   submitLabel?: string;
+  /** Disable currency editing — set once the group already has expenses. */
+  currencyLocked?: boolean;
 }
 
 const currencyOptions = CURRENCIES.map((c) => ({
@@ -33,6 +35,7 @@ export function GroupForm({
   onSubmit,
   isLoading = false,
   submitLabel = "Create Group",
+  currencyLocked = false,
 }: GroupFormProps) {
   const [name, setName] = useState(defaultValues?.name ?? "");
   const [description, setDescription] = useState(
@@ -106,8 +109,13 @@ export function GroupForm({
         options={currencyOptions}
         value={currency}
         onChange={(e) => setCurrency(e.target.value)}
-        disabled={isLoading}
+        disabled={isLoading || currencyLocked}
       />
+      {currencyLocked && (
+        <p className="-mt-3 text-xs text-text-muted">
+          Currency can&apos;t be changed once the group has expenses.
+        </p>
+      )}
 
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" isLoading={isLoading}>

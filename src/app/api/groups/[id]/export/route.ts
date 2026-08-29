@@ -9,14 +9,18 @@ import {
 } from "@/lib/mongodb/collections";
 import { serializeDoc } from "@/lib/utils";
 import { generateGroupXlsx } from "@/lib/export/xlsx-generator";
+import { generateGroupCsv } from "@/lib/export/csv-generator";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await getAuthUser();
     const { id } = await params;
+    const format = new URL(request.url).searchParams.get("format") === "csv"
+      ? "csv"
+      : "xlsx";
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid group ID" }, { status: 400 });
@@ -64,6 +68,26 @@ export async function GET(
       .toArray();
     const settlements = settlementDocs.map(serializeDoc);
 
+    const safeName = group.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+
+    if (format === "csv") {
+      const csv = generateGroupCsv(
+        { name: group.name, currency: group.currency },
+        members,
+        expenses,
+        settlements,
+      );
+      const csvBuffer = Buffer.from(csv, "utf-8");
+      return new Response(new Uint8Array(csvBuffer), {
+        status: 200,
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="${safeName}-expenses.csv"`,
+          "Content-Length": csvBuffer.length.toString(),
+        },
+      });
+    }
+
     // Generate workbook
     const xlsxBuffer = await generateGroupXlsx(
       { name: group.name, currency: group.currency },
@@ -72,16 +96,12 @@ export async function GET(
       settlements,
     );
 
-    // Sanitize filename
-    const safeName = group.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-    const filename = `${safeName}-expenses.xlsx`;
-
     return new Response(new Uint8Array(xlsxBuffer), {
       status: 200,
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `attachment; filename="${safeName}-expenses.xlsx"`,
         "Content-Length": xlsxBuffer.length.toString(),
       },
     });

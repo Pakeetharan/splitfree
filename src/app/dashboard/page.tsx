@@ -3,10 +3,24 @@ import { Plus } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { getPageAuthUser } from "@/lib/auth";
 import { listGroups } from "@/lib/services/group.service";
-import { GroupCard } from "@/components/groups/group-card";
+import { GroupsGrid } from "@/components/groups/groups-grid";
 import { DashboardSummary } from "@/components/dashboard/summary-strip";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { computeBalances } from "@/lib/engine/balance-calculator";
+import { getExpensesCollection } from "@/lib/mongodb/collections";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  food: "Food",
+  transport: "Transport",
+  housing: "Housing",
+  entertainment: "Entertainment",
+  shopping: "Shopping",
+  utilities: "Utilities",
+  health: "Health",
+  travel: "Travel",
+  education: "Education",
+  other: "Other",
+};
 
 export const metadata = {
   title: `Dashboard — ${APP_NAME}`,
@@ -56,6 +70,48 @@ export default async function DashboardPage() {
   }
 
   const netBalance = crossGroupLent - crossGroupOwed;
+
+  // Last activity + top category across all of the user's groups
+  const lastActivityMap = new Map<string, string>();
+  let topCategoryLabel: string | null = null;
+
+  if (groups.length > 0) {
+    const groupOids = groups.map((g) => g._id);
+    const expensesCol = await getExpensesCollection();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const [lastActivityResult, topCategoryResult] = await Promise.all([
+      expensesCol
+        .aggregate<{ _id: import("mongodb").ObjectId; lastDate: Date }>([
+          { $match: { groupId: { $in: groupOids }, deletedAt: null } },
+          { $group: { _id: "$groupId", lastDate: { $max: "$createdAt" } } },
+        ])
+        .toArray(),
+      expensesCol
+        .aggregate<{ _id: string | null; total: number }>([
+          {
+            $match: {
+              groupId: { $in: groupOids },
+              deletedAt: null,
+              date: { $gte: thirtyDaysAgo },
+            },
+          },
+          { $group: { _id: "$category", total: { $sum: "$amount" } } },
+          { $sort: { total: -1 } },
+          { $limit: 1 },
+        ])
+        .toArray(),
+    ]);
+
+    for (const row of lastActivityResult) {
+      lastActivityMap.set(row._id.toHexString(), row.lastDate.toISOString());
+    }
+
+    const topCategory = topCategoryResult[0];
+    if (topCategory?._id) {
+      topCategoryLabel = CATEGORY_LABELS[topCategory._id] ?? topCategory._id;
+    }
+  }
 
   // Determine quick action targets
   const recentGroupId =
@@ -114,27 +170,33 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
+          {topCategoryLabel && (
+            <p className="mb-4 text-sm text-text-muted">
+              You&apos;ve spent the most on{" "}
+              <span className="font-medium text-text-secondary">
+                {topCategoryLabel}
+              </span>{" "}
+              across all groups in the last 30 days.
+            </p>
+          )}
+
           {groups.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {groups.map((group) => {
+            <GroupsGrid
+              groups={groups.map((group) => {
                 const gid = group._id.toHexString();
                 const balInfo = groupBalanceMap.get(gid);
-                return (
-                  <GroupCard
-                    key={gid}
-                    group={{
-                      _id: gid,
-                      name: group.name,
-                      description: group.description,
-                      currency: group.currency,
-                      memberCount: group.memberCount,
-                      createdAt: group.createdAt.toISOString(),
-                      myBalance: balInfo?.myBalance,
-                    }}
-                  />
-                );
+                return {
+                  _id: gid,
+                  name: group.name,
+                  description: group.description,
+                  currency: group.currency,
+                  memberCount: group.memberCount,
+                  createdAt: group.createdAt.toISOString(),
+                  myBalance: balInfo?.myBalance,
+                  lastActivityAt: lastActivityMap.get(gid) ?? null,
+                };
               })}
-            </div>
+            />
           ) : (
             /* Empty state */
             <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-primary px-6 py-16 text-center">

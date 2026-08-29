@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { formatDate, formatAmount } from "@/lib/utils";
+import { formatDate, formatAmount, formatRelativeTime } from "@/lib/utils";
 
 interface GroupCardProps {
   group: {
@@ -20,6 +20,7 @@ interface GroupCardProps {
     memberCount?: number;
     createdAt: string;
     myBalance?: number; // cents — positive = owed to you, negative = you owe
+    lastActivityAt?: string | null;
   };
 }
 
@@ -52,6 +53,11 @@ export function GroupCard({ group }: GroupCardProps) {
                 </span>
               )}
               <span className="text-xs">{formatDate(group.createdAt)}</span>
+              {group.lastActivityAt && (
+                <span className="text-xs">
+                  · Active {formatRelativeTime(group.lastActivityAt)}
+                </span>
+              )}
             </div>
             {balance !== 0 && (
               <span

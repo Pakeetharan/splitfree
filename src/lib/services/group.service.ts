@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import {
   getGroupsCollection,
   getMembersCollection,
+  getExpensesCollection,
 } from "@/lib/mongodb/collections";
 import type { CreateGroupInput, UpdateGroupInput } from "@/lib/validators/group";
 import type { DbGroup } from "@/types/database";
@@ -180,8 +181,23 @@ export async function updateGroup(
   if (updateFields.name !== undefined) $set.name = updateFields.name;
   if (updateFields.description !== undefined)
     $set.description = updateFields.description;
-  if (updateFields.currency !== undefined)
+  if (
+    updateFields.currency !== undefined &&
+    updateFields.currency !== group.currency
+  ) {
+    const expenses = await getExpensesCollection();
+    const hasExpenses = await expenses.findOne({
+      groupId: groupOid,
+      deletedAt: null,
+    });
+    if (hasExpenses) {
+      throw errorResponse(
+        "Currency can't be changed once the group has expenses, since it would corrupt existing balances.",
+        400,
+      );
+    }
     $set.currency = updateFields.currency;
+  }
 
   const result = await groups.findOneAndUpdate(
     { _id: groupOid, _version: data._version },

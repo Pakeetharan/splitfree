@@ -6,20 +6,27 @@ import {
   getGroupsCollection,
 } from "@/lib/mongodb/collections";
 import type { BalanceEntry } from "@/types/api";
+import { computeBalancesFromDocs } from "@/lib/engine/balance-math";
+
+export { computeBalancesFromDocs } from "@/lib/engine/balance-math";
+
+async function fetchGroupBalanceDocs(groupOid: ObjectId) {
+  const members = await getMembersCollection();
+  const expenses = await getExpensesCollection();
+  const settlements = await getSettlementsCollection();
+
+  const [memberDocs, expenseDocs, settlementDocs] = await Promise.all([
+    members.find({ groupId: groupOid, deletedAt: null }).toArray(),
+    expenses.find({ groupId: groupOid, deletedAt: null }).toArray(),
+    settlements.find({ groupId: groupOid, deletedAt: null }).toArray(),
+  ]);
+
+  return { memberDocs, expenseDocs, settlementDocs };
+}
 
 /**
- * Compute the net balance for each active member in a group.
- * Positive = member is owed money (others owe them).
- * Negative = member owes money to others.
- *
- * Formula per member:
- *   netBalance = totalPaid - totalOwed - totalSettledOut + totalSettledIn
- *
- * Where:
- *   totalPaid       = sum of expense.amount WHERE paidBy == member
- *   totalOwed       = sum of expense.splitAmount WHERE member is in splitAmong
- *   totalSettledOut = sum of settlement.amount WHERE payer == member
- *   totalSettledIn  = sum of settlement.amount WHERE payee == member
+ * Compute balances for an authenticated group member. Verifies membership
+ * before returning any data.
  */
 export async function computeBalances(
   userId: string,
@@ -50,70 +57,23 @@ export async function computeBalances(
     });
   }
 
-  // Get all active members
-  const memberDocs = await members
-    .find({ groupId: groupOid, deletedAt: null })
-    .toArray();
+  const { memberDocs, expenseDocs, settlementDocs } =
+    await fetchGroupBalanceDocs(groupOid);
 
-  const expenses = await getExpensesCollection();
-  const settlements = await getSettlementsCollection();
+  return computeBalancesFromDocs(memberDocs, expenseDocs, settlementDocs);
+}
 
-  const [expenseDocs, settlementDocs] = await Promise.all([
-    expenses.find({ groupId: groupOid, deletedAt: null }).toArray(),
-    settlements.find({ groupId: groupOid, deletedAt: null }).toArray(),
-  ]);
+/**
+ * Compute balances for a group without an authenticated member — used by the
+ * public share-link view. Callers are responsible for validating the share
+ * token before calling this.
+ */
+export async function computeBalancesForShare(
+  groupId: string,
+): Promise<BalanceEntry[]> {
+  const groupOid = new ObjectId(groupId);
+  const { memberDocs, expenseDocs, settlementDocs } =
+    await fetchGroupBalanceDocs(groupOid);
 
-  // Initialize balance map
-  const balanceMap = new Map<string, number>(
-    memberDocs.map((m) => [m._id.toHexString(), 0]),
-  );
-  // Tracks each member's own share of expenses (what they actually spent),
-  // regardless of who fronted the money.
-  const totalSpentMap = new Map<string, number>(
-    memberDocs.map((m) => [m._id.toHexString(), 0]),
-  );
-
-  // Process expenses
-  for (const expense of expenseDocs) {
-    const payerId = expense.paidBy.toHexString();
-    const splitCount = expense.splitAmong.length;
-    if (splitCount === 0) continue;
-
-    const base = Math.floor(expense.amount / splitCount);
-    const remainder = expense.amount - base * splitCount;
-
-    // Payer gets credited the full amount
-    const payerBal = balanceMap.get(payerId) ?? 0;
-    balanceMap.set(payerId, payerBal + expense.amount);
-
-    // Each split member gets debited their share, and it counts toward
-    // their total spend for the trip
-    expense.splitAmong.forEach((memberId, idx) => {
-      const mid = memberId.toHexString();
-      const share = idx < remainder ? base + 1 : base;
-      const curBal = balanceMap.get(mid) ?? 0;
-      balanceMap.set(mid, curBal - share);
-      totalSpentMap.set(mid, (totalSpentMap.get(mid) ?? 0) + share);
-    });
-  }
-
-  // Process settlements
-  for (const settlement of settlementDocs) {
-    const payerId = settlement.payer.toHexString();
-    const payeeId = settlement.payee.toHexString();
-
-    const payerBal = balanceMap.get(payerId) ?? 0;
-    balanceMap.set(payerId, payerBal + settlement.amount); // payer reduces their debt
-
-    const payeeBal = balanceMap.get(payeeId) ?? 0;
-    balanceMap.set(payeeId, payeeBal - settlement.amount); // payee reduces credit
-  }
-
-  // Build response
-  return memberDocs.map((m) => ({
-    memberId: m._id.toHexString(),
-    name: m.name || `Member`,
-    netBalance: balanceMap.get(m._id.toHexString()) ?? 0,
-    totalSpent: totalSpentMap.get(m._id.toHexString()) ?? 0,
-  }));
+  return computeBalancesFromDocs(memberDocs, expenseDocs, settlementDocs);
 }

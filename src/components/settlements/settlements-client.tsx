@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Receipt } from "lucide-react";
+import { Receipt, SearchX } from "lucide-react";
 import { SettlementCard } from "@/components/settlements/settlement-card";
 import { SettleForm } from "@/components/settlements/settle-form";
+import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import type { SettlementResponse, MemberResponse } from "@/types/api";
 
@@ -28,7 +29,15 @@ export function SettlementsClient({
   initialSettlements,
 }: SettlementsClientProps) {
   const [settlements, setSettlements] = useState(initialSettlements);
+  const [memberFilter, setMemberFilter] = useState("");
   const { toast } = useToast();
+
+  const filteredSettlements = useMemo(() => {
+    if (!memberFilter) return settlements;
+    return settlements.filter(
+      (s) => s.payer === memberFilter || s.payee === memberFilter,
+    );
+  }, [settlements, memberFilter]);
 
   const currentUserMemberId = members.find(
     (m) => m.userId === currentUserId,
@@ -78,6 +87,22 @@ export function SettlementsClient({
         />
       </div>
 
+      {settlements.length > 3 && (
+        <Select
+          value={memberFilter}
+          onChange={(e) => setMemberFilter(e.target.value)}
+          aria-label="Filter by member"
+          className="max-w-xs"
+        >
+          <option value="">All members</option>
+          {members.map((m) => (
+            <option key={m._id} value={m._id}>
+              {m.name}
+            </option>
+          ))}
+        </Select>
+      )}
+
       {/* Settlement list */}
       {settlements.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border-primary px-6 py-12 text-center">
@@ -96,9 +121,16 @@ export function SettlementsClient({
             for suggested payments.
           </p>
         </div>
+      ) : filteredSettlements.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border-primary px-6 py-12 text-center">
+          <SearchX className="mx-auto mb-2 h-8 w-8 text-text-muted" />
+          <p className="text-sm font-medium text-text-muted">
+            No settlements match this filter
+          </p>
+        </div>
       ) : (
         <div className="space-y-2">
-          {settlements.map((s) => (
+          {filteredSettlements.map((s) => (
             <SettlementCard
               key={s._id}
               settlement={s}

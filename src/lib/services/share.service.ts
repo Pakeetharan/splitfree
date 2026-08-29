@@ -11,6 +11,9 @@ import {
 import type { CreateShareTokenInput } from "@/lib/validators/share";
 import type { DbShareToken } from "@/types/database";
 import { serializeDoc } from "@/lib/utils";
+import { computeBalancesFromDocs } from "@/lib/engine/balance-calculator";
+import { computeOptimalSettlements } from "@/lib/engine/settlement-optimizer";
+import type { BalanceEntry, TransferSuggestion } from "@/types/api";
 
 function forbidden(): Response {
   return new Response(JSON.stringify({ error: "Forbidden" }), {
@@ -88,6 +91,8 @@ export interface PublicShareData {
   members: Record<string, unknown>[];
   expenses: Record<string, unknown>[];
   settlements: Record<string, unknown>[];
+  balances: BalanceEntry[];
+  suggestedSettlements: TransferSuggestion[];
   expiresAt: string;
 }
 
@@ -121,7 +126,6 @@ export async function getPublicShareData(token: string): Promise<PublicShareData
     expenses
       .find({ groupId: shareToken.groupId, deletedAt: null })
       .sort({ date: -1 })
-      .limit(100)
       .toArray(),
     settlements
       .find({ groupId: shareToken.groupId, deletedAt: null })
@@ -153,11 +157,20 @@ export async function getPublicShareData(token: string): Promise<PublicShareData
     return m;
   });
 
+  const balances = computeBalancesFromDocs(
+    enrichedMembers,
+    expenseDocs,
+    settlementDocs,
+  );
+  const suggestedSettlements = computeOptimalSettlements(balances);
+
   return {
     group: serializeDoc(group),
     members: enrichedMembers.map(serializeDoc),
     expenses: expenseDocs.map(serializeDoc),
     settlements: settlementDocs.map(serializeDoc),
+    balances,
+    suggestedSettlements,
     expiresAt: shareToken.expiresAt?.toISOString() ?? "",
   };
 }

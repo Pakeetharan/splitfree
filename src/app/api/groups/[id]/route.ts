@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getAuthUser } from "@/lib/auth";
 import { getGroup, updateGroup, deleteGroup } from "@/lib/services/group.service";
 import { updateGroupSchema } from "@/lib/validators/group";
+import { getExpensesCollection } from "@/lib/mongodb/collections";
 import { serializeDoc } from "@/lib/utils";
 
 export async function GET(
@@ -13,7 +14,12 @@ export async function GET(
     const user = await getAuthUser();
     const { id } = await params;
     const group = await getGroup(user.id, id);
-    return NextResponse.json(serializeDoc(group));
+    const expenses = await getExpensesCollection();
+    const hasExpenses = !!(await expenses.findOne({
+      groupId: group._id,
+      deletedAt: null,
+    }));
+    return NextResponse.json({ ...serializeDoc(group), hasExpenses });
   } catch (err: unknown) {
     if (err instanceof Response) return err;
     return NextResponse.json(

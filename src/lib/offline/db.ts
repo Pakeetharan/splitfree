@@ -47,7 +47,11 @@ export interface OfflineExpense {
   paidBy: string;
   splitAmong: string[];
   splitAmount: number;
+  splitType?: "equal" | "exact" | "percentage" | "shares";
+  splitValues?: { memberId: string; value: number }[] | null;
+  splitDetails?: { memberId: string; amount: number }[];
   category: string | null;
+  notes?: string | null;
   date: string;
   createdBy: string;
   createdAt: string;

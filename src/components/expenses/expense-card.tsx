@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatAmount, formatDate } from "@/lib/utils";
@@ -64,6 +64,13 @@ export function ExpenseCard({
       ? categoryColors[expense.category]
       : categoryColors.other;
 
+  const isEqualSplit = !expense.splitType || expense.splitType === "equal";
+  const splitTypeLabel: Record<string, string> = {
+    exact: "Exact amounts",
+    percentage: "By percentage",
+    shares: "By shares",
+  };
+
   return (
     <div className="flex items-center justify-between rounded-xl border border-border-primary bg-surface-elevated p-4">
       <div className="flex-1 min-w-0">
@@ -78,6 +85,11 @@ export function ExpenseCard({
               {expense.category}
             </span>
           )}
+          {!isEqualSplit && (
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              {splitTypeLabel[expense.splitType] ?? "Custom split"}
+            </span>
+          )}
         </div>
         <div className="mt-1 flex items-center gap-3 text-xs text-text-muted">
           <span>{formatDate(expense.date)}</span>
@@ -86,6 +98,11 @@ export function ExpenseCard({
             {expense.splitAmong.length} member
             {expense.splitAmong.length !== 1 ? "s" : ""}
           </span>
+          {expense.notes && (
+            <span title={expense.notes} className="inline-flex items-center">
+              <StickyNote className="h-3.5 w-3.5" />
+            </span>
+          )}
         </div>
       </div>
 
@@ -95,7 +112,9 @@ export function ExpenseCard({
             {formatAmount(expense.amount, currency)}
           </p>
           <p className="text-xs text-text-muted">
-            {formatAmount(expense.splitAmount, currency)}/person
+            {isEqualSplit
+              ? `${formatAmount(expense.splitAmount, currency)}/person`
+              : "Custom split"}
           </p>
         </div>
 

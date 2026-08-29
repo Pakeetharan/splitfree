@@ -152,6 +152,7 @@ export default function GroupSettingsPage() {
           currency: group.currency,
         }}
         submitLabel="Save Changes"
+        currencyLocked={group.hasExpenses ?? false}
       />
 
       {/* Share & Export */}
@@ -172,12 +173,25 @@ export default function GroupSettingsPage() {
         </div>
         <div className="flex flex-col gap-4 border-t border-border-subtle p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium">Export to Excel</p>
+            <p className="text-sm font-medium">Export data</p>
             <p className="text-xs text-text-muted">
-              Download all expenses and settlements as an XLSX file.
+              Download all expenses and settlements as a file.
             </p>
           </div>
-          <ExportButton groupId={id} groupName={group.name} />
+          <div className="flex items-center gap-2">
+            <ExportButton
+              groupId={id}
+              groupName={group.name}
+              format="xlsx"
+              label="Excel"
+            />
+            <ExportButton
+              groupId={id}
+              groupName={group.name}
+              format="csv"
+              label="CSV"
+            />
+          </div>
         </div>
       </div>
 
