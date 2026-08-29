@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import type { ExpenseResponse, MemberResponse } from "@/types/api";
@@ -23,19 +24,27 @@ export function EditExpenseDialog({
   currency,
   onSaved,
 }: EditExpenseDialogProps) {
+  const [saving, setSaving] = useState(false);
+
   const handleSaved = () => {
     onSaved();
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Edit Expense">
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Edit Expense"
+      preventClose={saving}
+    >
       <ExpenseForm
         groupId={groupId}
         members={members}
         currency={currency}
         expense={expense}
         onSaved={handleSaved}
+        onLoadingChange={setSaving}
       />
     </Dialog>
   );

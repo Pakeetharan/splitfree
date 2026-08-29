@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { RouteProgress } from "@/components/layout/route-progress";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,6 +57,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <RouteProgress />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>

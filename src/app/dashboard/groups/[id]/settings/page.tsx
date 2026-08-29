@@ -7,6 +7,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import { GroupForm } from "@/components/groups/group-form";
 import { ShareDialog } from "@/components/share/share-dialog";
 import { ExportButton } from "@/components/groups/export-button";
+import { Button } from "@/components/ui/button";
 import type { GroupResponse } from "@/types/api";
 
 export default function GroupSettingsPage() {
@@ -194,14 +195,15 @@ export default function GroupSettingsPage() {
               Permanently remove this group and all its data.
             </p>
           </div>
-          <button
+          <Button
             onClick={handleDelete}
-            disabled={deleting}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+            isLoading={deleting}
+            variant="outline"
+            className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
           >
             <Trash2 className="h-4 w-4" />
-            {deleting ? "Deleting…" : "Delete Group"}
-          </button>
+            Delete Group
+          </Button>
         </div>
       </div>
     </div>

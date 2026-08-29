@@ -32,6 +32,7 @@ export function ConfirmDialog({
       onOpenChange={onOpenChange}
       title={title}
       description={description}
+      preventClose={loading}
     >
       <div className="flex gap-3 pt-2">
         <Button
@@ -46,14 +47,14 @@ export function ConfirmDialog({
         <Button
           type="button"
           onClick={onConfirm}
-          disabled={loading}
+          isLoading={loading}
           className={`flex-1 ${
             variant === "danger"
               ? "bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
               : ""
           }`}
         >
-          {loading ? "Please wait…" : confirmLabel}
+          {confirmLabel}
         </Button>
       </div>
     </Dialog>

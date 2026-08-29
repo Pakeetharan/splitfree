@@ -112,8 +112,8 @@ export function ShareDialog({ groupId }: ShareDialogProps) {
                 <option value={72}>Expires in 72 hours</option>
                 <option value={168}>Expires in 7 days</option>
               </select>
-              <Button onClick={handleCreate} disabled={creating} size="sm">
-                {creating ? "Creating…" : "Create Link"}
+              <Button onClick={handleCreate} isLoading={creating} size="sm">
+                Create Link
               </Button>
             </div>
 

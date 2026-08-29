@@ -110,8 +110,8 @@ export function GroupForm({
       />
 
       <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving…" : submitLabel}
+        <Button type="submit" isLoading={isLoading}>
+          {submitLabel}
         </Button>
         <Link href="/dashboard">
           <Button type="button" variant="ghost" disabled={isLoading}>

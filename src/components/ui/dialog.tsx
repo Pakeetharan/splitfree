@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 export interface DialogProps {
@@ -15,6 +15,8 @@ export interface DialogProps {
   /** Optional title rendered in the dialog header */
   title?: string;
   description?: string;
+  /** Blocks backdrop click / Escape close — use while a request is in flight */
+  preventClose?: boolean;
   children: ReactNode;
 }
 
@@ -25,14 +27,26 @@ export function Dialog({
   onClose,
   title,
   description,
+  preventClose = false,
   children,
 }: DialogProps) {
   const visible = open ?? isOpen ?? false;
 
   const handleClose = () => {
+    if (preventClose) return;
     onClose?.();
     onOpenChange?.(false);
   };
+
+  useEffect(() => {
+    if (!visible) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, preventClose]);
 
   if (!visible) return null;
 
@@ -40,20 +54,24 @@ export function Dialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50"
+        className="animate-overlay-in fixed inset-0 bg-black/50"
         onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Panel — flex column so header stays fixed and body scrolls */}
-      <div className="relative z-10 mx-4 flex w-full max-w-lg flex-col rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950" style={{ maxHeight: "90dvh" }}>
+      <div
+        className="animate-dialog-in relative z-10 mx-4 flex w-full max-w-lg flex-col rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950"
+        style={{ maxHeight: "90dvh" }}
+      >
         {/* Fixed header */}
         <div className="shrink-0 px-6 pt-6 pb-0">
           {/* Close button */}
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            disabled={preventClose}
+            className="absolute right-4 top-4 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:pointer-events-none disabled:opacity-40 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           >
             <X className="h-5 w-5" />
             <span className="sr-only">Close</span>

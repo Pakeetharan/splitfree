@@ -17,6 +17,8 @@ interface ExpenseFormProps {
   expense?: ExpenseResponse;
   /** Called after a successful save in edit mode */
   onSaved?: () => void;
+  /** Reports submit-in-flight state to the parent (e.g. to block dialog close) */
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 export function ExpenseForm({
@@ -25,6 +27,7 @@ export function ExpenseForm({
   currency,
   expense,
   onSaved,
+  onLoadingChange,
 }: ExpenseFormProps) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
@@ -44,8 +47,13 @@ export function ExpenseForm({
   const [date, setDate] = useState(
     expense ? expense.date.split("T")[0] : today,
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoadingState] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const setLoading = (value: boolean) => {
+    setLoadingState(value);
+    onLoadingChange?.(value);
+  };
 
   const toggleMember = (memberId: string) => {
     setSplitAmong((prev) =>
@@ -253,17 +261,13 @@ export function ExpenseForm({
         </Button>
         <Button
           type="submit"
+          isLoading={loading}
           disabled={
-            loading ||
-            !description.trim() ||
-            !amountStr ||
-            splitAmong.length === 0
+            !description.trim() || !amountStr || splitAmong.length === 0
           }
           className="flex-1"
         >
-          {loading ? "Saving…" : ""}
-          {!loading && isEditMode ? "Save Changes" : ""}
-          {!loading && !isEditMode ? "Add Expense" : ""}
+          {isEditMode ? "Save Changes" : "Add Expense"}
         </Button>
       </div>
     </form>

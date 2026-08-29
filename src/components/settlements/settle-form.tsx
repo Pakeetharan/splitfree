@@ -118,7 +118,7 @@ export function SettleForm({
         {suggestion ? "Record Payment" : "Record Settlement"}
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen} preventClose={loading}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Record Settlement</DialogTitle>
@@ -209,8 +209,8 @@ export function SettleForm({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || !amountStr}>
-                {loading ? "Saving…" : "Record"}
+              <Button type="submit" isLoading={loading} disabled={!amountStr}>
+                Record
               </Button>
             </DialogFooter>
           </form>

@@ -65,7 +65,7 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
         Add Member
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen} preventClose={loading}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Member</DialogTitle>
@@ -115,8 +115,8 @@ export function AddMemberForm({ groupId, onAdded }: AddMemberFormProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || !name.trim()}>
-                {loading ? "Adding…" : "Add Member"}
+              <Button type="submit" isLoading={loading} disabled={!name.trim()}>
+                Add Member
               </Button>
             </DialogFooter>
           </form>

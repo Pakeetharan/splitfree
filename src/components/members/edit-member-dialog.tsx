@@ -71,7 +71,12 @@ export function EditMemberDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Edit Member">
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Edit Member"
+      preventClose={loading}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -123,10 +128,11 @@ export function EditMemberDialog({
           </Button>
           <Button
             type="submit"
-            disabled={loading || !name.trim()}
+            isLoading={loading}
+            disabled={!name.trim()}
             className="flex-1"
           >
-            {loading ? "Saving…" : "Save Changes"}
+            Save Changes
           </Button>
         </div>
       </form>
