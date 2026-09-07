@@ -4,6 +4,7 @@ import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 import { ArrowRight, Users, WifiOff, Zap, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "@/components/layout/user-menu";
+import { GoogleOneTap } from "@/components/auth/google-one-tap";
 
 export default async function LandingPage() {
   const supabase = await createClient();
@@ -13,6 +14,7 @@ export default async function LandingPage() {
   const isLoggedIn = !!user;
   return (
     <div className="flex min-h-screen flex-col">
+      {!isLoggedIn && <GoogleOneTap />}
       {/* Header */}
       <header className="border-b border-border-primary bg-surface-primary/80 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
