@@ -15,6 +15,8 @@ export const PUBLIC_PATHS = [
   "/",
   "/login",
   "/offline",
+  "/privacy",
+  "/terms",
   "/api/auth/callback",
   "/api/auth/one-tap",
   "/api/share",

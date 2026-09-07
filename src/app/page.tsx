@@ -119,8 +119,16 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border-primary bg-surface-primary py-6">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-text-muted">
-          {APP_NAME} is open source.
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 text-center text-sm text-text-muted sm:flex-row sm:justify-center sm:gap-4">
+          <span>{APP_NAME} is open source.</span>
+          <span className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-text-secondary hover:underline">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-text-secondary hover:underline">
+              Terms
+            </Link>
+          </span>
         </div>
       </footer>
     </div>

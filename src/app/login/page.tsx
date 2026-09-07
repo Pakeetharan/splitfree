@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LoginButton } from "@/components/auth/login-button";
 import { APP_NAME } from "@/lib/constants";
@@ -39,7 +40,15 @@ export default async function LoginPage() {
         <div className="rounded-xl border border-border-primary bg-surface-elevated p-6 shadow-sm">
           <LoginButton />
           <p className="mt-4 text-xs text-text-muted">
-            By signing in you agree to our terms of service.
+            By signing in you agree to our{" "}
+            <Link href="/terms" className="underline hover:text-text-secondary">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline hover:text-text-secondary">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
       </div>
